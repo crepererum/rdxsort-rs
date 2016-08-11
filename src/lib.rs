@@ -7,3 +7,4 @@ pub trait RdxSort {
 mod template;
 mod unsigned_integer;
 mod signed_integer;
+mod floats;

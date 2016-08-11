@@ -1,6 +1,7 @@
 extern crate rand;
 extern crate rdx_sort;
 
+use std::f64;
 use std::iter;
 use std::ops;
 
@@ -155,4 +156,9 @@ fn test_rnd_u32() {
 #[test]
 fn test_rnd_u64() {
     test_rnd_generic::<u64>(u64::min_value(), u64::max_value(), vec![0u64, 1u64, u64::max_value() - 1]);
+}
+
+#[test]
+fn test_rnd_f64() {
+    test_rnd_generic::<f64>(f64::MIN, f64::MAX, vec![-f64::INFINITY, -0f64, 0f64, f64::INFINITY]);
 }
