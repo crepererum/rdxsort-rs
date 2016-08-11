@@ -73,6 +73,22 @@ impl<T> HelperFloatHack for Vec<T>
     }
 }
 
+impl FloatHack for f32 {
+    type Alias = u32;
+
+    fn zero() -> Self {
+        0f32
+    }
+
+    fn query_normal(&self) -> bool {
+        self.is_normal()
+    }
+
+    fn query_infinite(&self) -> bool {
+        self.is_infinite()
+    }
+}
+
 impl FloatHack for f64 {
     type Alias = u64;
 
@@ -86,6 +102,12 @@ impl FloatHack for f64 {
 
     fn query_infinite(&self) -> bool {
         self.is_infinite()
+    }
+}
+
+impl RdxSort for Vec<f32> {
+    fn rdxsort(&mut self) {
+        self.rdxsort_();
     }
 }
 
