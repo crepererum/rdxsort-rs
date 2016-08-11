@@ -31,8 +31,7 @@ fn is_sorted<T>(data: &Vec<T>) -> bool
 }
 
 fn test_generic<T>(data: Vec<T>)
-    where T: Clone,
-          T: PartialOrd,
+    where T: Clone + PartialOrd,
           Vec<T>: RdxSort
 {
     let mut data = data;
@@ -49,13 +48,11 @@ fn test_generic<T>(data: Vec<T>)
 }
 
 fn test_rnd_generic<T>(vmin: T, vmax: T, vspecial: Vec<T>)
-    where T: Clone,
-          T: PartialOrd,
-          T: SampleRange,
+    where T: Clone + PartialOrd + SampleRange,
           Vec<T>: RdxSort
 {
     // config
-    let n = 100_000;
+    let n = 10_000;
 
     // generate data
     let r = Range::new(vmin.clone(), vmax.clone());
@@ -81,11 +78,9 @@ fn test_rnd_generic<T>(vmin: T, vmax: T, vspecial: Vec<T>)
 }
 
 fn test_full_generic<T>(vmin: T, vmax: T)
-    where T: Clone,
-          T: PartialOrd,
-          T: ops::Add,
-            ops::Range<T> : iter::Iterator,
-        Vec<T>: iter::FromIterator<<ops::Range<T> as iter::Iterator>::Item>,
+    where T: Clone+ PartialOrd + ops::Add,
+          ops::Range<T>: iter::Iterator,
+          Vec<T>: iter::FromIterator<<ops::Range<T> as iter::Iterator>::Item>,
           Vec<T>: RdxSort
 {
     // TODO: use inclusive range once it's stable
@@ -160,5 +155,6 @@ fn test_rnd_u64() {
 
 #[test]
 fn test_rnd_f64() {
-    test_rnd_generic::<f64>(f64::MIN, f64::MAX, vec![-f64::INFINITY, -0f64, 0f64, f64::INFINITY]);
+    // DO NOT use MIN/MAX here, since that overflows the RNG system!
+    test_rnd_generic::<f64>(0f64, 1f64, vec![-f64::INFINITY, -0f64, 0f64, f64::INFINITY]);
 }
