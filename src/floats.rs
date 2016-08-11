@@ -1,5 +1,7 @@
 use super::RdxSort;
 
+use core::ptr;
+
 use std::cmp;
 use std::mem;
 use std::ops;
@@ -17,7 +19,7 @@ trait HelperFloatHack {
 }
 
 // TODO: directly implement `RdxSort` once https://github.com/rust-lang/rfcs/issues/1053 is solved
-impl<T> HelperFloatHack for Vec<T>
+impl<T> HelperFloatHack for [T]
     where T: FloatHack + Clone + cmp::PartialEq + cmp::PartialOrd + ops::Neg,
           T::Alias: Clone,
           <T as ops::Neg>::Output: Into<T>,
@@ -58,18 +60,31 @@ impl<T> HelperFloatHack for Vec<T>
         bucket_negative.rdxsort();
         bucket_positive.rdxsort();
 
-        self.clear();
-        self.append(&mut bucket_inf_negative);
-        self.extend(bucket_negative.iter()
-                                   .rev()
-                                   .cloned()
-                                   .map(|x| unsafe { mem::transmute_copy::<T::Alias, T>(&x) }));
-        self.append(&mut bucket_zero_negative);
-        self.append(&mut bucket_zero_positive);
-        self.extend(bucket_positive.iter()
-                                   .cloned()
-                                   .map(|x| unsafe { mem::transmute_copy::<T::Alias, T>(&x) }));
-        self.append(&mut bucket_inf_positive);
+        unsafe {
+            ptr::copy_nonoverlapping(bucket_inf_negative.as_ptr() as *mut T, self.get_unchecked_mut(0), bucket_inf_negative.len());
+        }
+        let mut pos = bucket_inf_negative.len();
+        for x in bucket_negative.iter().rev().cloned() {
+            unsafe {
+                *self.get_unchecked_mut(pos) = mem::transmute_copy::<T::Alias, T>(&x);
+            }
+            pos += 1;
+        }
+        unsafe {
+            ptr::copy_nonoverlapping(bucket_zero_negative.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_zero_negative.len());
+        }
+        pos += bucket_zero_negative.len();
+        unsafe {
+            ptr::copy_nonoverlapping(bucket_zero_positive.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_zero_positive.len());
+        }
+        pos += bucket_zero_positive.len();
+        unsafe {
+            ptr::copy_nonoverlapping(bucket_positive.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_positive.len());
+        }
+        pos += bucket_positive.len();
+        unsafe {
+            ptr::copy_nonoverlapping(bucket_inf_positive.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_inf_positive.len());
+        }
     }
 }
 
@@ -105,13 +120,13 @@ impl FloatHack for f64 {
     }
 }
 
-impl RdxSort for Vec<f32> {
+impl RdxSort for [f32] {
     fn rdxsort(&mut self) {
         self.rdxsort_();
     }
 }
 
-impl RdxSort for Vec<f64> {
+impl RdxSort for [f64] {
     fn rdxsort(&mut self) {
         self.rdxsort_();
     }
