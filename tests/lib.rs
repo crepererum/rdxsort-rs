@@ -40,53 +40,24 @@ trait MyHash {
     fn hash_it<H>(&self, state: &mut H) where H: Hasher;
 }
 
-impl MyHash for u8 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
+macro_rules! trivial_myhash {
+    ($t:ty) => {
+        impl MyHash for $t {
+            fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+                self.hash(state);
+            }
+        }
     }
 }
 
-impl MyHash for u16 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
-
-impl MyHash for u32 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
-
-impl MyHash for u64 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
-
-impl MyHash for i8 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
-
-impl MyHash for i16 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
-
-impl MyHash for i32 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
-
-impl MyHash for i64 {
-    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
-        self.hash(state);
-    }
-}
+trivial_myhash!(i8);
+trivial_myhash!(i16);
+trivial_myhash!(i32);
+trivial_myhash!(i64);
+trivial_myhash!(u8);
+trivial_myhash!(u16);
+trivial_myhash!(u32);
+trivial_myhash!(u64);
 
 impl MyHash for f32 {
     fn hash_it<H>(&self, state: &mut H) where H: Hasher {

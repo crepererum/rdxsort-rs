@@ -71,74 +71,29 @@ impl<T> HelperTwosComplement for [T]
     }
 }
 
-impl HelperTwosComplementTemplate for i8 {
-    type Alias = u8;
+macro_rules! impl_rdxsort {
+    ($t:ty, $alias:ty, $min:expr, $zero:expr) => {
+        impl HelperTwosComplementTemplate for $t {
+            type Alias = $alias;
 
-    fn min() -> Self {
-        i8::min_value()
-    }
+            fn min() -> Self {
+                $min
+            }
 
-    fn zero() -> Self {
-        0i8
-    }
-}
+            fn zero() -> Self {
+                $zero
+            }
+        }
 
-impl HelperTwosComplementTemplate for i16 {
-    type Alias = u16;
-
-    fn min() -> Self {
-        i16::min_value()
-    }
-
-    fn zero() -> Self {
-        0i16
+        impl RdxSort for [$t] {
+            fn rdxsort(&mut self) {
+                self.rdxsort_();
+            }
+        }
     }
 }
 
-impl HelperTwosComplementTemplate for i32 {
-    type Alias = u32;
-
-    fn min() -> Self {
-        i32::min_value()
-    }
-
-    fn zero() -> Self {
-        0i32
-    }
-}
-
-impl HelperTwosComplementTemplate for i64 {
-    type Alias = u64;
-
-    fn min() -> Self {
-        i64::min_value()
-    }
-
-    fn zero() -> Self {
-        0i64
-    }
-}
-
-impl RdxSort for [i8] {
-    fn rdxsort(&mut self) {
-        self.rdxsort_();
-    }
-}
-
-impl RdxSort for [i16] {
-    fn rdxsort(&mut self) {
-        self.rdxsort_();
-    }
-}
-
-impl RdxSort for [i32] {
-    fn rdxsort(&mut self) {
-        self.rdxsort_();
-    }
-}
-
-impl RdxSort for [i64] {
-    fn rdxsort(&mut self) {
-        self.rdxsort_();
-    }
-}
+impl_rdxsort!(i8, u8, i8::min_value(), 0i8);
+impl_rdxsort!(i16, u16, i16::min_value(), 0i16);
+impl_rdxsort!(i32, u32, i32::min_value(), 0i32);
+impl_rdxsort!(i64, u64, i64::min_value(), 0i64);

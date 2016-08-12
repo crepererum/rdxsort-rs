@@ -111,46 +111,31 @@ impl<T> HelperFloatHack for [T]
     }
 }
 
-impl FloatHack for f32 {
-    type Alias = u32;
+macro_rules! impl_rdxsort {
+    ($t:ty, $alias:ty, $zero:expr) => {
+        impl FloatHack for $t {
+            type Alias = $alias;
 
-    fn zero() -> Self {
-        0f32
-    }
+            fn zero() -> Self {
+                $zero
+            }
 
-    fn query_normal(&self) -> bool {
-        self.is_normal()
-    }
+            fn query_normal(&self) -> bool {
+                self.is_normal()
+            }
 
-    fn query_infinite(&self) -> bool {
-        self.is_infinite()
-    }
-}
+            fn query_infinite(&self) -> bool {
+                self.is_infinite()
+            }
+        }
 
-impl FloatHack for f64 {
-    type Alias = u64;
-
-    fn zero() -> Self {
-        0f64
-    }
-
-    fn query_normal(&self) -> bool {
-        self.is_normal()
-    }
-
-    fn query_infinite(&self) -> bool {
-        self.is_infinite()
+        impl RdxSort for [$t] {
+            fn rdxsort(&mut self) {
+                self.rdxsort_();
+            }
+        }
     }
 }
 
-impl RdxSort for [f32] {
-    fn rdxsort(&mut self) {
-        self.rdxsort_();
-    }
-}
-
-impl RdxSort for [f64] {
-    fn rdxsort(&mut self) {
-        self.rdxsort_();
-    }
-}
+impl_rdxsort!(f32, u32, 0f32);
+impl_rdxsort!(f64, u64, 0f64);
