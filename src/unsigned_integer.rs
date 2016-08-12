@@ -47,15 +47,15 @@ impl RdxSortTemplate for u32 {
 
 impl RdxSortTemplate for u64 {
     fn cfg_nbuckets() -> usize {
-        64
+        16
     }
 
     fn cfg_nrounds() -> usize {
-        11
+        16
     }
 
     fn get_bucket(&self, round: usize) -> usize {
-        let shift = round * 6;
-        ((self >> shift) & 31u64) as usize
+        let shift = round << 2;
+        ((self >> shift) & 15u64) as usize
     }
 }
