@@ -3,7 +3,6 @@ name = "rdx_sort"
 version = "0.1.0"
 authors = ["Marco Neumann <marco@crepererum.net>"]
 license = "MIT"
-license-file = "LICENSE-MIT"
 
 [dev-dependencies]
 rand = "0.3"
