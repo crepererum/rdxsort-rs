@@ -5,9 +5,35 @@ use core::ptr;
 use std::cmp;
 use std::mem;
 
+/// Generic RadixSort implementation
+///
+/// Works by splitting the work in rounds. During every round, the data is sorted into buckets and
+/// is then collected again. Rounds are count from `0` to (exclusive) `cfg_nrounds()`.
+///
+/// The number of buckets is fixed for all rounds. That does not mean that the template has to use
+/// all of them, since unused buckets are just empty and have no effect on the collected results.
+/// Same hold for the number of rounds. Over-booking one or both of them wastes resources of
+/// course.
+///
+/// **WARNING: The result returned from `get_bucket()` is not checked. Wrong implementations may
+/// crash the program, or destroy the world, or both!!!**
 pub trait RdxSortTemplate {
+    /// Sets the number of buckets used by the generic implementation.
     fn cfg_nbuckets() -> usize;
+
+    /// Sets the number of rounds scheduled by the generic implementation.
     fn cfg_nrounds() -> usize;
+
+    /// Returns the bucket, depending on the round.
+    ///
+    /// This should respect the radix, e.g.:
+    ///
+    /// - if the number of buckets is `2` and the type is an unsigned integer, then the result is
+    ///   the bit starting with the least significant one.
+    /// - if the number of buckets is `8` and the type is an unsigned integer, then the result is
+    ///   the byte starting with the least significant one.
+    ///
+    /// **Never** return a bucker greater or equal the number of buckets. See warning above!
     fn get_bucket(&self, round: usize) -> usize;
 }
 
