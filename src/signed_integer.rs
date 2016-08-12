@@ -49,16 +49,20 @@ impl<T> HelperTwosComplement for [T]
         positive.rdxsort();
         negative.rdxsort();
 
+        assert!(min.len() <= self.len(), "bug: oversized bucket");
         unsafe {
             ptr::copy_nonoverlapping(min.as_ptr(), self.get_unchecked_mut(0), min.len());
         }
         let mut pos = min.len();
+        assert!(pos + negative.len() <= self.len(), "bug: oversized bucket");
         unsafe {
             ptr::copy_nonoverlapping(negative.as_ptr() as *mut T,
                                      self.get_unchecked_mut(pos),
                                      negative.len());
         }
         pos += negative.len();
+        assert!(pos + positive.len() <= self.len(),
+                "bug: bucket sizes doe not sum up");
         unsafe {
             ptr::copy_nonoverlapping(positive.as_ptr() as *mut T,
                                      self.get_unchecked_mut(pos),

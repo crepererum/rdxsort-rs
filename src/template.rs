@@ -55,6 +55,8 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
 
         for x in self.iter().cloned() {
             let b = x.get_bucket(0);
+            assert!(b < cfg_nbuckets,
+                    "Your RdxSortTemplate implementation returns a bucket >= cfg_nbuckets()!");
             unsafe {
                 buckets_a.get_unchecked_mut(b).push(x);
             }
@@ -67,6 +69,9 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
             for bucket in &buckets_a {
                 for x in bucket.iter().cloned() {
                     let b = x.get_bucket(round);
+                    assert!(b < cfg_nbuckets,
+                            "Your RdxSortTemplate implementation returns a bucket >= \
+                             cfg_nbuckets()!");
                     unsafe {
                         buckets_b.get_unchecked_mut(b).push(x);
                     }
@@ -77,6 +82,8 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
 
         let mut pos = 0;
         for bucket in &mut buckets_a {
+            assert!(pos + bucket.len() <= self.len(),
+                    "bug: a buckets got oversized");
             unsafe {
                 ptr::copy_nonoverlapping(bucket.as_ptr(),
                                          self.get_unchecked_mut(pos),
@@ -84,6 +91,8 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
             }
             pos += bucket.len();
         }
+
+        assert!(pos == self.len(), "bug: bucket size does not sum up");
     }
 }
 

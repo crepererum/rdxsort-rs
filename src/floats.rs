@@ -60,36 +60,49 @@ impl<T> HelperFloatHack for [T]
         bucket_negative.rdxsort();
         bucket_positive.rdxsort();
 
+        assert!(bucket_inf_negative.len() <= self.len(),
+                "bug: oversized bucket");
         unsafe {
             ptr::copy_nonoverlapping(bucket_inf_negative.as_ptr() as *mut T,
                                      self.get_unchecked_mut(0),
                                      bucket_inf_negative.len());
         }
         let mut pos = bucket_inf_negative.len();
+        assert!(pos + bucket_negative.len() <= self.len(),
+                "bug: oversized bucket");
         for x in bucket_negative.iter().rev().cloned() {
+            assert!(pos < self.len(), "bug: oversized bucket");
             unsafe {
                 *self.get_unchecked_mut(pos) = mem::transmute_copy::<T::Alias, T>(&x);
             }
             pos += 1;
         }
+        assert!(pos + bucket_zero_negative.len() <= self.len(),
+                "bug: oversized bucket");
         unsafe {
             ptr::copy_nonoverlapping(bucket_zero_negative.as_ptr() as *mut T,
                                      self.get_unchecked_mut(pos),
                                      bucket_zero_negative.len());
         }
         pos += bucket_zero_negative.len();
+        assert!(pos + bucket_zero_positive.len() <= self.len(),
+                "bug: oversized bucket");
         unsafe {
             ptr::copy_nonoverlapping(bucket_zero_positive.as_ptr() as *mut T,
                                      self.get_unchecked_mut(pos),
                                      bucket_zero_positive.len());
         }
         pos += bucket_zero_positive.len();
+        assert!(pos + bucket_positive.len() <= self.len(),
+                "bug: oversized bucket");
         unsafe {
             ptr::copy_nonoverlapping(bucket_positive.as_ptr() as *mut T,
                                      self.get_unchecked_mut(pos),
                                      bucket_positive.len());
         }
         pos += bucket_positive.len();
+        assert!(pos + bucket_inf_positive.len() == self.len(),
+                "bug: bucket sizes do not sum up");
         unsafe {
             ptr::copy_nonoverlapping(bucket_inf_positive.as_ptr() as *mut T,
                                      self.get_unchecked_mut(pos),
