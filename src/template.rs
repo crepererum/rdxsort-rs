@@ -5,7 +5,7 @@ use core::ptr;
 use std::cmp;
 use std::mem;
 
-/// Generic RadixSort implementation
+/// Generic Radix Sort implementation
 ///
 /// Works by splitting the work in rounds. During every round, the data is sorted into buckets and
 /// is then collected again. Rounds are count from `0` to (exclusive) `cfg_nrounds()`.

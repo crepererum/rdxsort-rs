@@ -1,8 +1,8 @@
 extern crate core;
 
-/// RadixSort implementation for some type
+/// Radix Sort implementation for some type
 pub trait RdxSort {
-    /// Execute RadixSort, overwrites (unsorted) content of the type.
+    /// Execute Radix Sort, overwrites (unsorted) content of the type.
     fn rdxsort(&mut self);
 }
 

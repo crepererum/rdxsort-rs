@@ -61,7 +61,9 @@ impl<T> HelperFloatHack for [T]
         bucket_positive.rdxsort();
 
         unsafe {
-            ptr::copy_nonoverlapping(bucket_inf_negative.as_ptr() as *mut T, self.get_unchecked_mut(0), bucket_inf_negative.len());
+            ptr::copy_nonoverlapping(bucket_inf_negative.as_ptr() as *mut T,
+                                     self.get_unchecked_mut(0),
+                                     bucket_inf_negative.len());
         }
         let mut pos = bucket_inf_negative.len();
         for x in bucket_negative.iter().rev().cloned() {
@@ -71,19 +73,27 @@ impl<T> HelperFloatHack for [T]
             pos += 1;
         }
         unsafe {
-            ptr::copy_nonoverlapping(bucket_zero_negative.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_zero_negative.len());
+            ptr::copy_nonoverlapping(bucket_zero_negative.as_ptr() as *mut T,
+                                     self.get_unchecked_mut(pos),
+                                     bucket_zero_negative.len());
         }
         pos += bucket_zero_negative.len();
         unsafe {
-            ptr::copy_nonoverlapping(bucket_zero_positive.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_zero_positive.len());
+            ptr::copy_nonoverlapping(bucket_zero_positive.as_ptr() as *mut T,
+                                     self.get_unchecked_mut(pos),
+                                     bucket_zero_positive.len());
         }
         pos += bucket_zero_positive.len();
         unsafe {
-            ptr::copy_nonoverlapping(bucket_positive.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_positive.len());
+            ptr::copy_nonoverlapping(bucket_positive.as_ptr() as *mut T,
+                                     self.get_unchecked_mut(pos),
+                                     bucket_positive.len());
         }
         pos += bucket_positive.len();
         unsafe {
-            ptr::copy_nonoverlapping(bucket_inf_positive.as_ptr() as *mut T, self.get_unchecked_mut(pos), bucket_inf_positive.len());
+            ptr::copy_nonoverlapping(bucket_inf_positive.as_ptr() as *mut T,
+                                     self.get_unchecked_mut(pos),
+                                     bucket_inf_positive.len());
         }
     }
 }
