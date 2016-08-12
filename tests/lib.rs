@@ -1,9 +1,14 @@
 extern crate rand;
 extern crate rdx_sort;
 
+use std::collections;
 use std::f32;
 use std::f64;
+use std::hash;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::iter;
+use std::mem;
 use std::ops;
 
 use rand::{Rng, XorShiftRng};
@@ -31,6 +36,87 @@ fn is_sorted<T>(data: &Vec<T>) -> bool
     return true;
 }
 
+trait MyHash {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher;
+}
+
+impl MyHash for u8 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for u16 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for u32 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for u64 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for i8 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for i16 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for i32 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for i64 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        self.hash(state);
+    }
+}
+
+impl MyHash for f32 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        let alias = unsafe {mem::transmute_copy::<f32, u32>(self)};
+        alias.hash(state);
+    }
+}
+
+impl MyHash for f64 {
+    fn hash_it<H>(&self, state: &mut H) where H: Hasher {
+        let alias = unsafe {mem::transmute_copy::<f64, u64>(self)};
+        alias.hash(state);
+    }
+}
+
+fn guess_entropy<T>(data: &Vec<T>) -> f64 where T: MyHash {
+    let mut counter = collections::HashMap::<u64, usize>::new();
+
+    for x in data {
+        let mut hasher = hash::SipHasher::new();
+        x.hash_it(&mut hasher);
+        let key = hasher.finish();
+
+        let state = counter.entry(key).or_insert(0);
+        *state += 1;
+    }
+
+    counter.values().map(|&x| x as f64 / data.len() as f64).map(|x| -x * x.log2()).fold(0f64, |a, b| a + b)
+}
+
 fn test_generic<T>(data: Vec<T>)
     where T: Clone + PartialOrd,
           Vec<T>: RdxSort
@@ -49,11 +135,12 @@ fn test_generic<T>(data: Vec<T>)
 }
 
 fn test_rnd_generic<T>(vmin: T, vmax: T, vspecial: Vec<T>)
-    where T: Clone + PartialOrd + SampleRange,
+    where T: Clone + PartialOrd + SampleRange + MyHash,
           Vec<T>: RdxSort
 {
     // config
     let n = 10_000;
+    let entropy_threshold = 1f64;
 
     // generate data
     let r = Range::new(vmin.clone(), vmax.clone());
@@ -74,6 +161,7 @@ fn test_rnd_generic<T>(vmin: T, vmax: T, vspecial: Vec<T>)
         data[i] = x;
     }
     assert!(data.len() == n, "generated data has wrong length!");
+    assert!(guess_entropy(&data) >= entropy_threshold, "generated data does not contain enough entropy!");
 
     test_generic(data);
 }
