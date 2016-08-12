@@ -6,6 +6,8 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/crepererum/rdxsort-rs.git"
 documentation = "https://crepererum.github.io/rdxsort-rs/"
+description = "Fast Radix Sort"
+keywords = ["sort", "radix"]
 
 [dev-dependencies]
 rand = "0.3"
