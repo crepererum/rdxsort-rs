@@ -16,6 +16,10 @@ rust:
   # check it compiles on the latest stable compiler
   - stable
 
+cache:
+  cargo: true
+  pip: true
+
 # load travis-cargo
 before_script:
   - |
