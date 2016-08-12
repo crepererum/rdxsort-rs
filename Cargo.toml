@@ -11,3 +11,6 @@ keywords = ["sort", "radix"]
 
 [dev-dependencies]
 rand = "0.3"
+
+[features]
+unstable = []
