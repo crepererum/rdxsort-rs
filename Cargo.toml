@@ -1,5 +1,5 @@
 [package]
-name = "rdx_sort"
+name = "rdxsort"
 version = "0.1.0"
 authors = ["Marco Neumann <marco@crepererum.net>"]
 license = "MIT"

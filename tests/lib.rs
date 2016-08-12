@@ -1,5 +1,5 @@
 extern crate rand;
-extern crate rdx_sort;
+extern crate rdxsort;
 
 use std::collections;
 use std::f32;
@@ -15,7 +15,7 @@ use rand::{Rng, XorShiftRng};
 use rand::distributions::{IndependentSample, Range};
 use rand::distributions::range::SampleRange;
 
-use rdx_sort::*;
+use rdxsort::*;
 
 fn is_sorted<T>(data: &Vec<T>) -> bool
     where T: Clone,

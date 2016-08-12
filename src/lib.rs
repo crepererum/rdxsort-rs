@@ -19,7 +19,7 @@
 //! ## Example
 //!
 //! ```
-//! use rdx_sort::*;
+//! use rdxsort::*;
 //!
 //! fn main() {
 //!     let mut data = vec![2, 10, 0, 1];
@@ -34,7 +34,7 @@
 //! describes how data is sorted into buckets and how many rounds of sorting are scheduled.
 //!
 //! ```
-//! use rdx_sort::*;
+//! use rdxsort::*;
 //!
 //! // `Clone` is required for `RdxSort`
 //! // `PartialEq` is only required for the equality assert, not for the actual sorting
