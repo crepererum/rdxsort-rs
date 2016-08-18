@@ -8,7 +8,7 @@ mod unstable {
     extern crate test;
     use self::test::Bencher;
 
-    use rand::XorShiftRng;
+    use rand::{Rng, XorShiftRng};
     use rand::distributions::{IndependentSample, Range};
     use rand::distributions::range::SampleRange;
 
@@ -17,6 +17,13 @@ mod unstable {
     static N_SMALL:  usize = 1_000;
     static N_MEDIUM: usize = 10_000;
     static N_LARGE:  usize = 100_000;
+
+    fn bench_exe<T, F>(b: &mut Bencher, data: Vec<T>, f: F) where T: Clone, F: Fn(Vec<T>) {
+        let _ = b.iter(|| {
+            let data2 = data.clone();
+            f(data2);
+        });
+    }
 
     fn bench_generic<T, F>(b: &mut Bencher, vmin: T, vmax: T, f: F, n: usize)
         where T: Clone + PartialOrd + SampleRange,
@@ -31,10 +38,7 @@ mod unstable {
         }
 
         // run benchmark
-        let _ = b.iter(|| {
-            let data2 = data.clone();
-            f(data2);
-        });
+        bench_exe(b, data, f);
     }
 
     fn bench_std_generic<T>(b: &mut Bencher, vmin: T, vmax: T, n: usize)
@@ -96,6 +100,59 @@ mod unstable {
                 bench_std_generic::<$t>(b, $min, $max, N_LARGE);
             }
         };
+    }
+
+    fn bench_bool_generic<F>(b: &mut Bencher, f: F, n: usize) where F: Fn(Vec<bool>) {
+        // generate data
+        let mut rng = XorShiftRng::new_unseeded();
+        let data: Vec<bool> = rng.gen_iter::<bool>().take(n).collect();
+
+        // run benchmark
+        bench_exe(b, data, f);
+    }
+
+    fn bench_std_bool_generic(b: &mut Bencher, n: usize) {
+        bench_bool_generic(b, |data| {
+            let mut data = data;
+            data.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        }, n);
+    }
+
+    fn bench_rdxsort_bool_generic(b: &mut Bencher, n: usize) {
+        bench_bool_generic(b, |data| {
+            let mut data = data;
+            data.rdxsort();
+        }, n);
+    }
+
+    #[bench]
+    fn bench_small_bool_rdxsort(b: &mut Bencher) {
+        bench_rdxsort_bool_generic(b, N_SMALL);
+    }
+
+    #[bench]
+    fn bench_small_bool_std(b: &mut Bencher) {
+        bench_std_bool_generic(b, N_SMALL);
+    }
+
+    #[bench]
+    fn bench_medium_bool_rdxsort(b: &mut Bencher) {
+        bench_rdxsort_bool_generic(b, N_MEDIUM);
+    }
+
+    #[bench]
+    fn bench_medium_bool_std(b: &mut Bencher) {
+        bench_std_bool_generic(b, N_MEDIUM);
+    }
+
+    #[bench]
+    fn bench_large_bool_rdxsort(b: &mut Bencher) {
+        bench_rdxsort_bool_generic(b, N_LARGE);
+    }
+
+    #[bench]
+    fn bench_large_bool_std(b: &mut Bencher) {
+        bench_std_bool_generic(b, N_LARGE);
     }
 
     bench_type!(f32, 0f32, 1f32, [

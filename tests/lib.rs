@@ -17,6 +17,8 @@ use rand::distributions::range::SampleRange;
 
 use rdxsort::*;
 
+static CFG_N: usize = 10_000;
+
 fn is_sorted<T>(data: &Vec<T>) -> bool
     where T: Clone,
           T: PartialOrd
@@ -110,28 +112,27 @@ fn test_rnd_generic<T>(vmin: T, vmax: T, vspecial: Vec<T>)
           Vec<T>: RdxSort
 {
     // config
-    let n = 10_000;
     let entropy_threshold = 1f64;
 
     // generate data
     let r = Range::new(vmin.clone(), vmax.clone());
     let mut rng = XorShiftRng::new_unseeded();
-    let mut data = Vec::with_capacity(n);
-    for _ in (0 as usize)..n {
+    let mut data = Vec::with_capacity(CFG_N);
+    for _ in (0 as usize)..CFG_N {
         data.push(r.ind_sample(&mut rng));
     }
-    let mut positions = Vec::with_capacity(n);
-    for i in 0..n {
+    let mut positions = Vec::with_capacity(CFG_N);
+    for i in 0..CFG_N {
         positions.push(i);
     }
     rng.shuffle(&mut positions[..]);
-    assert!(vspecial.len() + 2 < n, "to many special values to test!");
+    assert!(vspecial.len() + 2 < CFG_N, "to many special values to test!");
     data[positions[0]] = vmin;
     data[positions[1]] = vmax;
     for (i, x) in positions.into_iter().skip(2).zip(vspecial.into_iter()) {
         data[i] = x;
     }
-    assert!(data.len() == n, "generated data has wrong length!");
+    assert!(data.len() == CFG_N, "generated data has wrong length!");
     assert!(guess_entropy(&data) >= entropy_threshold, "generated data does not contain enough entropy!");
 
     test_generic(data);
@@ -149,6 +150,14 @@ fn test_full_generic<T>(vmin: T, vmax: T)
 
     let mut rng = XorShiftRng::new_unseeded();
     rng.shuffle(&mut data[..]);
+
+    test_generic(data);
+}
+
+#[test]
+fn test_rnd_bool() {
+    let mut rng = XorShiftRng::new_unseeded();
+    let data: Vec<bool> = rng.gen_iter::<bool>().take(CFG_N).collect();
 
     test_generic(data);
 }

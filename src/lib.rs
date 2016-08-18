@@ -18,6 +18,7 @@
 //!
 //! Currently, the following data types are supported:
 //!
+//! - **bool:** native implementation
 //! - **unsigned integers:** native implementation
 //! - **signed integers:** splitting into positive and negative parts and using the unsigned
 //!   implementation
@@ -58,26 +59,28 @@
 //! 64 bits, standard library sorting should be preferred.
 //!
 //! ```text
-//! test unstable::bench_small_f32_rdxsort  ... bench:      25,629 ns/iter (+/- 399)
-//! test unstable::bench_small_f32_std      ... bench:      76,913 ns/iter (+/- 670)
-//! test unstable::bench_small_f64_rdxsort  ... bench:      54,663 ns/iter (+/- 1,589)
-//! test unstable::bench_small_f64_std      ... bench:      81,153 ns/iter (+/- 1,325)
-//! test unstable::bench_small_i16_rdxsort  ... bench:      13,173 ns/iter (+/- 119)
-//! test unstable::bench_small_i16_std      ... bench:      32,490 ns/iter (+/- 547)
-//! test unstable::bench_small_i32_rdxsort  ... bench:      25,470 ns/iter (+/- 302)
-//! test unstable::bench_small_i32_std      ... bench:      30,539 ns/iter (+/- 1,021)
-//! test unstable::bench_small_i64_rdxsort  ... bench:      52,444 ns/iter (+/- 3,399)
-//! test unstable::bench_small_i64_std      ... bench:      30,512 ns/iter (+/- 277)
-//! test unstable::bench_small_i8_rdxsort   ... bench:       8,075 ns/iter (+/- 968)
-//! test unstable::bench_small_i8_std       ... bench:      43,994 ns/iter (+/- 1,099)
-//! test unstable::bench_small_u16_rdxsort  ... bench:      16,006 ns/iter (+/- 587)
-//! test unstable::bench_small_u16_std      ... bench:      33,313 ns/iter (+/- 2,342)
-//! test unstable::bench_small_u32_rdxsort  ... bench:      30,923 ns/iter (+/- 1,738)
-//! test unstable::bench_small_u32_std      ... bench:      34,286 ns/iter (+/- 3,338)
-//! test unstable::bench_small_u64_rdxsort  ... bench:      65,384 ns/iter (+/- 7,461)
-//! test unstable::bench_small_u64_std      ... bench:      34,208 ns/iter (+/- 717)
-//! test unstable::bench_small_u8_rdxsort   ... bench:       8,367 ns/iter (+/- 784)
-//! test unstable::bench_small_u8_std       ... bench:      45,695 ns/iter (+/- 1,256)
+//! test unstable::bench_small_bool_rdxsort  ... bench:       3,659 ns/iter (+/- 21)
+//! test unstable::bench_small_bool_std      ... bench:      28,051 ns/iter (+/- 1,161)
+//! test unstable::bench_small_f32_rdxsort   ... bench:      25,629 ns/iter (+/- 399)
+//! test unstable::bench_small_f32_std       ... bench:      76,913 ns/iter (+/- 670)
+//! test unstable::bench_small_f64_rdxsort   ... bench:      54,663 ns/iter (+/- 1,589)
+//! test unstable::bench_small_f64_std       ... bench:      81,153 ns/iter (+/- 1,325)
+//! test unstable::bench_small_i16_rdxsort   ... bench:      13,173 ns/iter (+/- 119)
+//! test unstable::bench_small_i16_std       ... bench:      32,490 ns/iter (+/- 547)
+//! test unstable::bench_small_i32_rdxsort   ... bench:      25,470 ns/iter (+/- 302)
+//! test unstable::bench_small_i32_std       ... bench:      30,539 ns/iter (+/- 1,021)
+//! test unstable::bench_small_i64_rdxsort   ... bench:      52,444 ns/iter (+/- 3,399)
+//! test unstable::bench_small_i64_std       ... bench:      30,512 ns/iter (+/- 277)
+//! test unstable::bench_small_i8_rdxsort    ... bench:       8,075 ns/iter (+/- 968)
+//! test unstable::bench_small_i8_std        ... bench:      43,994 ns/iter (+/- 1,099)
+//! test unstable::bench_small_u16_rdxsort   ... bench:      16,006 ns/iter (+/- 587)
+//! test unstable::bench_small_u16_std       ... bench:      33,313 ns/iter (+/- 2,342)
+//! test unstable::bench_small_u32_rdxsort   ... bench:      30,923 ns/iter (+/- 1,738)
+//! test unstable::bench_small_u32_std       ... bench:      34,286 ns/iter (+/- 3,338)
+//! test unstable::bench_small_u64_rdxsort   ... bench:      65,384 ns/iter (+/- 7,461)
+//! test unstable::bench_small_u64_std       ... bench:      34,208 ns/iter (+/- 717)
+//! test unstable::bench_small_u8_rdxsort    ... bench:       8,367 ns/iter (+/- 784)
+//! test unstable::bench_small_u8_std        ... bench:      45,695 ns/iter (+/- 1,256)
 //! ```
 //!
 //!
@@ -87,26 +90,28 @@
 //! for types with 64 bits is quite small.
 //!
 //! ```text
-//! test unstable::bench_medium_f32_rdxsort ... bench:     219,547 ns/iter (+/- 5,166)
-//! test unstable::bench_medium_f32_std     ... bench:   1,126,436 ns/iter (+/- 13,894)
-//! test unstable::bench_medium_f64_rdxsort ... bench:     426,906 ns/iter (+/- 7,456)
-//! test unstable::bench_medium_f64_std     ... bench:   1,140,845 ns/iter (+/- 22,528)
-//! test unstable::bench_medium_i16_rdxsort ... bench:     148,963 ns/iter (+/- 2,241)
-//! test unstable::bench_medium_i16_std     ... bench:     470,194 ns/iter (+/- 9,461)
-//! test unstable::bench_medium_i32_rdxsort ... bench:     234,601 ns/iter (+/- 2,066)
-//! test unstable::bench_medium_i32_std     ... bench:     458,349 ns/iter (+/- 7,521)
-//! test unstable::bench_medium_i64_rdxsort ... bench:     455,488 ns/iter (+/- 14,868)
-//! test unstable::bench_medium_i64_std     ... bench:     466,938 ns/iter (+/- 37,052)
-//! test unstable::bench_medium_i8_rdxsort  ... bench:      99,520 ns/iter (+/- 2,304)
-//! test unstable::bench_medium_i8_std      ... bench:     623,255 ns/iter (+/- 10,640)
-//! test unstable::bench_medium_u16_rdxsort ... bench:     141,764 ns/iter (+/- 2,476)
-//! test unstable::bench_medium_u16_std     ... bench:     507,617 ns/iter (+/- 161,140)
-//! test unstable::bench_medium_u32_rdxsort ... bench:     290,928 ns/iter (+/- 4,812)
-//! test unstable::bench_medium_u32_std     ... bench:     508,403 ns/iter (+/- 8,650)
-//! test unstable::bench_medium_u64_rdxsort ... bench:     578,533 ns/iter (+/- 12,939)
-//! test unstable::bench_medium_u64_std     ... bench:     517,811 ns/iter (+/- 42,321)
-//! test unstable::bench_medium_u8_rdxsort  ... bench:      75,994 ns/iter (+/- 3,254)
-//! test unstable::bench_medium_u8_std      ... bench:     661,781 ns/iter (+/- 11,298)
+//! test unstable::bench_medium_bool_rdxsort ... bench:      34,881 ns/iter (+/- 622)
+//! test unstable::bench_medium_bool_std     ... bench:     430,491 ns/iter (+/- 28,284)
+//! test unstable::bench_medium_f32_rdxsort  ... bench:     219,547 ns/iter (+/- 5,166)
+//! test unstable::bench_medium_f32_std      ... bench:   1,126,436 ns/iter (+/- 13,894)
+//! test unstable::bench_medium_f64_rdxsort  ... bench:     426,906 ns/iter (+/- 7,456)
+//! test unstable::bench_medium_f64_std      ... bench:   1,140,845 ns/iter (+/- 22,528)
+//! test unstable::bench_medium_i16_rdxsort  ... bench:     148,963 ns/iter (+/- 2,241)
+//! test unstable::bench_medium_i16_std      ... bench:     470,194 ns/iter (+/- 9,461)
+//! test unstable::bench_medium_i32_rdxsort  ... bench:     234,601 ns/iter (+/- 2,066)
+//! test unstable::bench_medium_i32_std      ... bench:     458,349 ns/iter (+/- 7,521)
+//! test unstable::bench_medium_i64_rdxsort  ... bench:     455,488 ns/iter (+/- 14,868)
+//! test unstable::bench_medium_i64_std      ... bench:     466,938 ns/iter (+/- 37,052)
+//! test unstable::bench_medium_i8_rdxsort   ... bench:      99,520 ns/iter (+/- 2,304)
+//! test unstable::bench_medium_i8_std       ... bench:     623,255 ns/iter (+/- 10,640)
+//! test unstable::bench_medium_u16_rdxsort  ... bench:     141,764 ns/iter (+/- 2,476)
+//! test unstable::bench_medium_u16_std      ... bench:     507,617 ns/iter (+/- 161,140)
+//! test unstable::bench_medium_u32_rdxsort  ... bench:     290,928 ns/iter (+/- 4,812)
+//! test unstable::bench_medium_u32_std      ... bench:     508,403 ns/iter (+/- 8,650)
+//! test unstable::bench_medium_u64_rdxsort  ... bench:     578,533 ns/iter (+/- 12,939)
+//! test unstable::bench_medium_u64_std      ... bench:     517,811 ns/iter (+/- 42,321)
+//! test unstable::bench_medium_u8_rdxsort   ... bench:      75,994 ns/iter (+/- 3,254)
+//! test unstable::bench_medium_u8_std       ... bench:     661,781 ns/iter (+/- 11,298)
 //! ```
 //!
 //!
@@ -115,26 +120,28 @@
 //! For large data sets, Radix Sort is great for all data types.
 //!
 //! ```text
-//! test unstable::bench_large_f32_rdxsort  ... bench:   3,140,773 ns/iter (+/- 239,846)
-//! test unstable::bench_large_f32_std      ... bench:  14,467,364 ns/iter (+/- 969,117)
-//! test unstable::bench_large_f64_rdxsort  ... bench:   7,087,326 ns/iter (+/- 592,293)
-//! test unstable::bench_large_f64_std      ... bench:  15,311,056 ns/iter (+/- 421,909)
-//! test unstable::bench_large_i16_rdxsort  ... bench:   1,469,987 ns/iter (+/- 49,132)
-//! test unstable::bench_large_i16_std      ... bench:   5,698,794 ns/iter (+/- 418,976)
-//! test unstable::bench_large_i32_rdxsort  ... bench:   2,767,764 ns/iter (+/- 103,383)
-//! test unstable::bench_large_i32_std      ... bench:   5,890,482 ns/iter (+/- 464,185)
-//! test unstable::bench_large_i64_rdxsort  ... bench:   5,547,276 ns/iter (+/- 262,864)
-//! test unstable::bench_large_i64_std      ... bench:   6,448,590 ns/iter (+/- 78,947)
-//! test unstable::bench_large_i8_rdxsort   ... bench:   1,018,863 ns/iter (+/- 10,951)
-//! test unstable::bench_large_i8_std       ... bench:   7,264,974 ns/iter (+/- 641,619)
-//! test unstable::bench_large_u16_rdxsort  ... bench:   1,530,227 ns/iter (+/- 101,171)
-//! test unstable::bench_large_u16_std      ... bench:   6,185,277 ns/iter (+/- 62,926)
-//! test unstable::bench_large_u32_rdxsort  ... bench:   3,231,873 ns/iter (+/- 284,360)
-//! test unstable::bench_large_u32_std      ... bench:   6,603,391 ns/iter (+/- 80,595)
-//! test unstable::bench_large_u64_rdxsort  ... bench:   6,655,903 ns/iter (+/- 407,888)
-//! test unstable::bench_large_u64_std      ... bench:   7,131,352 ns/iter (+/- 206,972)
-//! test unstable::bench_large_u8_rdxsort   ... bench:     757,607 ns/iter (+/- 63,312)
-//! test unstable::bench_large_u8_std       ... bench:   7,818,080 ns/iter (+/- 109,047)
+//! test unstable::bench_large_bool_rdxsort  ... bench:     358,367 ns/iter (+/- 33,621)
+//! test unstable::bench_large_bool_std      ... bench:   5,271,549 ns/iter (+/- 137,036)
+//! test unstable::bench_large_f32_rdxsort   ... bench:   3,140,773 ns/iter (+/- 239,846)
+//! test unstable::bench_large_f32_std       ... bench:  14,467,364 ns/iter (+/- 969,117)
+//! test unstable::bench_large_f64_rdxsort   ... bench:   7,087,326 ns/iter (+/- 592,293)
+//! test unstable::bench_large_f64_std       ... bench:  15,311,056 ns/iter (+/- 421,909)
+//! test unstable::bench_large_i16_rdxsort   ... bench:   1,469,987 ns/iter (+/- 49,132)
+//! test unstable::bench_large_i16_std       ... bench:   5,698,794 ns/iter (+/- 418,976)
+//! test unstable::bench_large_i32_rdxsort   ... bench:   2,767,764 ns/iter (+/- 103,383)
+//! test unstable::bench_large_i32_std       ... bench:   5,890,482 ns/iter (+/- 464,185)
+//! test unstable::bench_large_i64_rdxsort   ... bench:   5,547,276 ns/iter (+/- 262,864)
+//! test unstable::bench_large_i64_std       ... bench:   6,448,590 ns/iter (+/- 78,947)
+//! test unstable::bench_large_i8_rdxsort    ... bench:   1,018,863 ns/iter (+/- 10,951)
+//! test unstable::bench_large_i8_std        ... bench:   7,264,974 ns/iter (+/- 641,619)
+//! test unstable::bench_large_u16_rdxsort   ... bench:   1,530,227 ns/iter (+/- 101,171)
+//! test unstable::bench_large_u16_std       ... bench:   6,185,277 ns/iter (+/- 62,926)
+//! test unstable::bench_large_u32_rdxsort   ... bench:   3,231,873 ns/iter (+/- 284,360)
+//! test unstable::bench_large_u32_std       ... bench:   6,603,391 ns/iter (+/- 80,595)
+//! test unstable::bench_large_u64_rdxsort   ... bench:   6,655,903 ns/iter (+/- 407,888)
+//! test unstable::bench_large_u64_std       ... bench:   7,131,352 ns/iter (+/- 206,972)
+//! test unstable::bench_large_u8_rdxsort    ... bench:     757,607 ns/iter (+/- 63,312)
+//! test unstable::bench_large_u8_std        ... bench:   7,818,080 ns/iter (+/- 109,047)
 //! ```
 //!
 //!
@@ -204,6 +211,7 @@ pub trait RdxSort {
 }
 
 mod template;
+mod bool;
 mod unsigned_integer;
 mod signed_integer;
 mod floats;
