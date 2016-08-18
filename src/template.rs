@@ -35,6 +35,25 @@ pub trait RdxSortTemplate {
     ///
     /// **Never** return a bucker greater or equal the number of buckets. See warning above!
     fn get_bucket(&self, round: usize) -> usize;
+
+    /// Describes the fact that the content of a bucket should be copied back in reverse order
+    /// after a certain round.
+    fn reverse(round: usize, bucket: usize) -> bool;
+}
+
+#[inline]
+fn helper_bucket<T, I>(buckets_b: &mut Vec<Vec<T>>, iter: I, cfg_nbuckets: usize, round: usize)
+    where T: RdxSortTemplate,
+          I: Iterator<Item = T>
+{
+    for x in iter {
+        let b = x.get_bucket(round);
+        assert!(b < cfg_nbuckets,
+                "Your RdxSortTemplate implementation returns a bucket >= cfg_nbuckets()!");
+        unsafe {
+            buckets_b.get_unchecked_mut(b).push(x);
+        }
+    }
 }
 
 impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
@@ -66,30 +85,42 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
             for bucket in &mut buckets_b {
                 bucket.clear();
             }
-            for bucket in &buckets_a {
-                for x in bucket.iter().cloned() {
-                    let b = x.get_bucket(round);
-                    assert!(b < cfg_nbuckets,
-                            "Your RdxSortTemplate implementation returns a bucket >= \
-                             cfg_nbuckets()!");
-                    unsafe {
-                        buckets_b.get_unchecked_mut(b).push(x);
-                    }
+            for (i, bucket) in buckets_a.iter().enumerate() {
+                if T::reverse(round - 1, i) {
+                    helper_bucket(&mut buckets_b,
+                                   bucket.iter().rev().cloned(),
+                                   cfg_nbuckets,
+                                   round);
+                } else {
+                    helper_bucket(&mut buckets_b,
+                                   bucket.iter().cloned(),
+                                   cfg_nbuckets,
+                                   round);
                 }
             }
             mem::swap(&mut buckets_a, &mut buckets_b);
         }
 
         let mut pos = 0;
-        for bucket in &mut buckets_a {
+        for (i, bucket) in buckets_a.iter_mut().enumerate() {
             assert!(pos + bucket.len() <= self.len(),
                     "bug: a buckets got oversized");
-            unsafe {
-                ptr::copy_nonoverlapping(bucket.as_ptr(),
-                                         self.get_unchecked_mut(pos),
-                                         bucket.len());
+
+            if T::reverse(cfg_nrounds - 1, i) {
+                for x in bucket.iter().rev().cloned() {
+                    unsafe {
+                        *self.get_unchecked_mut(pos) = x;
+                    }
+                    pos += 1;
+                }
+            } else {
+                unsafe {
+                    ptr::copy_nonoverlapping(bucket.as_ptr(),
+                                             self.get_unchecked_mut(pos),
+                                             bucket.len());
+                }
+                pos += bucket.len();
             }
-            pos += bucket.len();
         }
 
         assert!(pos == self.len(), "bug: bucket size does not sum up");

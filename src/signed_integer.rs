@@ -6,14 +6,17 @@ use std::mem;
 macro_rules! impl_rdxsort {
     ($t:ty, $alias:ty, $min:expr, $zero:expr) => {
         impl RdxSortTemplate for $t {
+            #[inline]
             fn cfg_nbuckets() -> usize {
                 cmp::max(<$alias as RdxSortTemplate>::cfg_nbuckets(), 3)
             }
 
+            #[inline]
             fn cfg_nrounds() -> usize {
                 <$alias as RdxSortTemplate>::cfg_nrounds() + 1
             }
 
+            #[inline]
             fn get_bucket(&self, round: usize) -> usize {
                 if round < <$alias as RdxSortTemplate>::cfg_nrounds() {
                     let alias = unsafe { mem::transmute::<$t, $alias>(*self) };
@@ -28,6 +31,11 @@ macro_rules! impl_rdxsort {
                     }
 
                 }
+            }
+
+            #[inline]
+            fn reverse(_round: usize, _bucket: usize) -> bool {
+                false
             }
         }
     }
