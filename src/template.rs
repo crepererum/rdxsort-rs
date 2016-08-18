@@ -77,14 +77,7 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
             buckets_b.push(Vec::with_capacity(presize));
         }
 
-        for x in self.iter().cloned() {
-            let b = x.get_bucket(0);
-            assert!(b < cfg_nbuckets,
-                    "Your RdxSortTemplate implementation returns a bucket >= cfg_nbuckets()!");
-            unsafe {
-                buckets_a.get_unchecked_mut(b).push(x);
-            }
-        }
+        helper_bucket(&mut buckets_a, self.iter().cloned(), cfg_nbuckets, 0);
 
         for round in 1..cfg_nrounds {
             for bucket in &mut buckets_b {
