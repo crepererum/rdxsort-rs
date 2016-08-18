@@ -195,6 +195,7 @@ mod char;
 mod floats;
 mod signed_integer;
 mod template;
+mod tuple;
 mod unsigned_integer;
 
 pub use template::RdxSortTemplate;

@@ -50,6 +50,9 @@ macro_rules! trivial_myhash {
 
 trivial_myhash!([u8; 0]);
 trivial_myhash!([u8; 4]);
+trivial_myhash!((u8,));
+trivial_myhash!((u8, i32));
+trivial_myhash!((u8, i32, char));
 trivial_myhash!(bool);
 trivial_myhash!(char);
 trivial_myhash!(i8);
@@ -441,5 +444,64 @@ mod sub_f64 {
     #[test]
     fn test_single_f64() {
         test_single_generic::<f64>(3f64);
+    }
+}
+
+mod sub_tuple {
+    use super::*;
+
+    #[test]
+    fn test_empty_tuple0() {
+        test_empty_generic::<()>();
+    }
+
+    #[test]
+    fn test_single_tuple0() {
+        test_single_generic::<()>(());
+    }
+
+    #[test]
+    fn test_rnd_tuple1() {
+        test_rnd_generic::<(u8,)>(vec![]);
+    }
+
+    #[test]
+    fn test_empty_tuple1() {
+        test_empty_generic::<(u8,)>();
+    }
+
+    #[test]
+    fn test_single_tuple1() {
+        test_single_generic::<(u8,)>((1u8,));
+    }
+
+    #[test]
+    fn test_rnd_tuple2() {
+        test_rnd_generic::<(u8, i32)>(vec![]);
+    }
+
+    #[test]
+    fn test_empty_tuple2() {
+        test_empty_generic::<(u8, i32)>();
+    }
+
+    #[test]
+    fn test_single_tuple2() {
+        test_single_generic::<(u8, i32)>((1u8, 1337i32));
+    }
+
+    #[test]
+    fn test_rnd_tuple3() {
+        test_rnd_generic::<(u8, i32, char)>(vec![]);
+    }
+
+    #[test]
+    fn test_empty_tuple3() {
+        test_empty_generic::<(u8, i32, char)>();
+    }
+
+    #[test]
+    fn test_single_tuple3() {
+        test_single_generic::<(u8, i32, char)>((1u8, 1337i32, 'x'));
     }
 }
