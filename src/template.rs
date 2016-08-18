@@ -88,14 +88,11 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
             for (i, bucket) in buckets_a.iter().enumerate() {
                 if T::reverse(round - 1, i) {
                     helper_bucket(&mut buckets_b,
-                                   bucket.iter().rev().cloned(),
-                                   cfg_nbuckets,
-                                   round);
+                                  bucket.iter().rev().cloned(),
+                                  cfg_nbuckets,
+                                  round);
                 } else {
-                    helper_bucket(&mut buckets_b,
-                                   bucket.iter().cloned(),
-                                   cfg_nbuckets,
-                                   round);
+                    helper_bucket(&mut buckets_b, bucket.iter().cloned(), cfg_nbuckets, round);
                 }
             }
             mem::swap(&mut buckets_a, &mut buckets_b);
