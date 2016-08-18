@@ -48,6 +48,8 @@ macro_rules! trivial_myhash {
     }
 }
 
+trivial_myhash!([u8; 0]);
+trivial_myhash!([u8; 4]);
 trivial_myhash!(bool);
 trivial_myhash!(char);
 trivial_myhash!(i8);
@@ -157,6 +159,35 @@ pub fn test_full_generic<T>(vmin: T, vmax: T)
     rng.shuffle(&mut data[..]);
 
     test_generic(data);
+}
+
+mod sub_array {
+    use super::*;
+
+    #[test]
+    fn test_empty_array0() {
+        test_empty_generic::<[u8; 0]>();
+    }
+
+    #[test]
+    fn test_single_array0() {
+        test_single_generic::<[u8; 0]>([]);
+    }
+
+    #[test]
+    fn test_rnd_array4() {
+        test_rnd_generic::<[u8; 4]>(vec![]);
+    }
+
+    #[test]
+    fn test_empty_array4() {
+        test_empty_generic::<[u8; 4]>();
+    }
+
+    #[test]
+    fn test_single_array4() {
+        test_single_generic::<[u8; 4]>([1, 2, 3, 4]);
+    }
 }
 
 mod sub_bool {
