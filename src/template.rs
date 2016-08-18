@@ -63,6 +63,11 @@ impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
         let cfg_nbuckets = T::cfg_nbuckets();
         let cfg_nrounds = T::cfg_nrounds();
 
+        // early return
+        if cfg_nrounds == 0 {
+            return;
+        }
+
         let n = self.len();
         let presize = cmp::max(16, (n << 2) / cfg_nbuckets);  // TODO: justify the presize value
         let mut buckets_a: Vec<Vec<T>> = Vec::with_capacity(cfg_nbuckets);
