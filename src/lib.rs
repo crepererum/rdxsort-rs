@@ -19,6 +19,7 @@
 //! Currently, the following data types are supported:
 //!
 //! - **bool:** native implementation
+//! - **char:** native implementation
 //! - **unsigned integers:** native implementation
 //! - **signed integers:** splitting into positive and negative parts and using the unsigned
 //!   implementation
