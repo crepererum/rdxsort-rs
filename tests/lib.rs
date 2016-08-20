@@ -59,10 +59,12 @@ trivial_myhash!(i8);
 trivial_myhash!(i16);
 trivial_myhash!(i32);
 trivial_myhash!(i64);
+trivial_myhash!(isize);
 trivial_myhash!(u8);
 trivial_myhash!(u16);
 trivial_myhash!(u32);
 trivial_myhash!(u64);
+trivial_myhash!(usize);
 
 impl MyHash for f32 {
     fn hash_it<H>(&self, state: &mut H) where H: Hasher {
@@ -319,6 +321,25 @@ mod sub_i64 {
     }
 }
 
+mod sub_isize {
+    use super::*;
+
+    #[test]
+    fn test_rnd_isize() {
+        test_rnd_generic::<isize>(vec![isize::min_value(), isize::min_value() + 1, -1, 0, 1, isize::max_value() - 1, isize::max_value()]);
+    }
+
+    #[test]
+    fn test_empty_isize() {
+        test_empty_generic::<isize>();
+    }
+
+    #[test]
+    fn test_single_isize() {
+        test_single_generic::<isize>(3);
+    }
+}
+
 mod sub_u8 {
     use super::*;
 
@@ -402,6 +423,25 @@ mod sub_u64 {
     #[test]
     fn test_single_u64() {
         test_single_generic::<u64>(3u64);
+    }
+}
+
+mod sub_usize {
+    use super::*;
+
+    #[test]
+    fn test_rnd_usize() {
+        test_rnd_generic::<usize>(vec![0, 1, usize::max_value() - 1, usize::max_value()]);
+    }
+
+    #[test]
+    fn test_empty_usize() {
+        test_empty_generic::<usize>();
+    }
+
+    #[test]
+    fn test_single_usize() {
+        test_single_generic::<usize>(3);
     }
 }
 

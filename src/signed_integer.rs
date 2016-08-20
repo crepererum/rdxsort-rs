@@ -45,3 +45,72 @@ impl_rdxsort!(i8, u8, i8::min_value(), 0i8);
 impl_rdxsort!(i16, u16, i16::min_value(), 0i16);
 impl_rdxsort!(i32, u32, i32::min_value(), 0i32);
 impl_rdxsort!(i64, u64, i64::min_value(), 0i64);
+
+#[cfg(target_pointer_width = "16")]
+impl RdxSortTemplate for isize {
+    #[inline]
+    fn cfg_nbuckets() -> usize {
+        <i16 as RdxSortTemplate>::cfg_nbuckets()
+    }
+
+    #[inline]
+    fn cfg_nrounds() -> usize {
+        <i16 as RdxSortTemplate>::cfg_nrounds()
+    }
+
+    #[inline]
+    fn get_bucket(&self, round: usize) -> usize {
+        (*self as i16).get_bucket(round)
+    }
+
+    #[inline]
+    fn reverse(round: usize, bucket: usize) -> bool {
+        <i16 as RdxSortTemplate>::reverse(round, bucket)
+    }
+}
+
+#[cfg(target_pointer_width = "32")]
+impl RdxSortTemplate for isize {
+    #[inline]
+    fn cfg_nbuckets() -> usize {
+        <i32 as RdxSortTemplate>::cfg_nbuckets()
+    }
+
+    #[inline]
+    fn cfg_nrounds() -> usize {
+        <i32 as RdxSortTemplate>::cfg_nrounds()
+    }
+
+    #[inline]
+    fn get_bucket(&self, round: usize) -> usize {
+        (*self as i32).get_bucket(round)
+    }
+
+    #[inline]
+    fn reverse(round: usize, bucket: usize) -> bool {
+        <i32 as RdxSortTemplate>::reverse(round, bucket)
+    }
+}
+
+#[cfg(target_pointer_width = "64")]
+impl RdxSortTemplate for isize {
+    #[inline]
+    fn cfg_nbuckets() -> usize {
+        <i64 as RdxSortTemplate>::cfg_nbuckets()
+    }
+
+    #[inline]
+    fn cfg_nrounds() -> usize {
+        <i64 as RdxSortTemplate>::cfg_nrounds()
+    }
+
+    #[inline]
+    fn get_bucket(&self, round: usize) -> usize {
+        (*self as i64).get_bucket(round)
+    }
+
+    #[inline]
+    fn reverse(round: usize, bucket: usize) -> bool {
+        <i64 as RdxSortTemplate>::reverse(round, bucket)
+    }
+}
