@@ -189,12 +189,13 @@ pub trait RdxSort {
     fn rdxsort(&mut self);
 }
 
+#[macro_use] mod template;
+
 mod array;
 mod bool;
 mod char;
 mod floats;
 mod signed_integer;
-mod template;
 mod tuple;
 mod unsigned_integer;
 

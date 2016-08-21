@@ -41,6 +41,35 @@ pub trait RdxSortTemplate {
     fn reverse(round: usize, bucket: usize) -> bool;
 }
 
+/// Implements `t1` as alias of `t2`, e.g `usize = u64` on platforms that have 64 bit pointers.
+#[macro_export]
+macro_rules! rdxsort_template_alias {
+    ($t1:ty = $t2:ty) => {
+        impl RdxSortTemplate for $t1 {
+            #[inline]
+            fn cfg_nbuckets() -> usize {
+                <$t2 as RdxSortTemplate>::cfg_nbuckets()
+            }
+
+            #[inline]
+            fn cfg_nrounds() -> usize {
+                <$t2 as RdxSortTemplate>::cfg_nrounds()
+            }
+
+            #[inline]
+            fn get_bucket(&self, round: usize) -> usize {
+                (*self as $t2).get_bucket(round)
+            }
+
+
+            #[inline]
+            fn reverse(round: usize, bucket: usize) -> bool {
+                <$t2 as RdxSortTemplate>::reverse(round, bucket)
+            }
+        }
+    }
+}
+
 #[inline]
 fn helper_bucket<T, I>(buckets_b: &mut Vec<Vec<T>>, iter: I, cfg_nbuckets: usize, round: usize)
     where T: RdxSortTemplate,
