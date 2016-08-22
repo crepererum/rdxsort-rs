@@ -5,10 +5,10 @@
 //!
 //! The main reason for implementing yet another sorting algorithm is that most sorting algorithms
 //! are comparative methods. To sort data, they rely on a function that compares data elements. It
-//! can be proven that this leads to a runtime complexity of `O(n*log(n))` in avarage and `O(n^2)`
+//! can be proven that this leads to a runtime complexity of `O(n*log(n))` in average and `O(n^2)`
 //! in the worst case. In contrast to that, Radix Sort exploits that fact that many data types have
 //! a limited range of possible values and within that range a limited resolution (that also holds
-//! for floating point numbers). For a detailed explaination see the
+//! for floating point numbers). For a detailed explanation see the
 //! [Wikipedia article](https://en.wikipedia.org/wiki/Radix_sort). The result of this special
 //! treatment is a lowered and constant complexity of `O(n*k)` where `k` is the number of fixed
 //! rounds required to sort a specific data type.
@@ -18,14 +18,16 @@
 //!
 //! Currently, the following data types are supported:
 //!
-//! - **bool:** native implementation
-//! - **char:** native implementation
-//! - **unsigned integers:** native implementation
+//! - **bool:** simple split into 2 junks
+//! - **char:** behaves like `u32`
+//! - **unsigned integers:** native implementation, depending on the width
 //! - **signed integers:** splitting into positive and negative parts and using the unsigned
 //!   implementation
 //! - **floats:** splits data into `-∞`, `(-∞,-0)`, `-0`, `+0`, `(+0,+∞)`, `+∞` and treating the two
 //!   ranges as unsigned integer values. [Subnormals](https://en.wikipedia.org/wiki/Denormal_number)
 //!   and `NaN`s are not supported!
+//! - **arrays, tuples:** use the implementation of the inner data types
+//! - *custom data types...: fill in the provided template trait*
 //!
 //!
 //! ## Example
@@ -45,7 +47,7 @@
 //!
 //! Of course the lower runtime complexity of Radix Sort shows its power when sorting certain data
 //! types. The advantage depends on the size and complexity of the type. While short unsigned
-//! integers benifit the most, long types do not show that huge improvements. The following listing
+//! integers benefit the most, long types do not show that huge improvements. The following listing
 //! shows the runtime in ns required for sorting data sets of different sizes. The data sets are
 //! sampled using an uniform distribution. The best algorithm out of the following is marked:
 //!
@@ -136,17 +138,22 @@
 //! }
 //!
 //! impl RdxSortTemplate for Foo {
+//!     // using `#[inline]` is generally recommended since it helps
+//!     // the compiler to optimize the sorting algorithm
+//!     #[inline]
 //!     fn cfg_nbuckets() -> usize {
 //!         // usually too high, but works as a simple demonstration
 //!         // `256 = 2^8`
 //!         256
 //!     }
 //!
+//!     #[inline]
 //!     fn cfg_nrounds() -> usize {
 //!         // one per sub-type
 //!         2
 //!     }
 //!
+//!     #[inline]
 //!     fn get_bucket(&self, round: usize) -> usize {
 //!         // return the least significant digit first
 //!         if round == 0 {
@@ -156,6 +163,7 @@
 //!         }
 //!     }
 //!
+//!     #[inline]
 //!     fn reverse(_round: usize, _bucket: usize) -> bool {
 //!         // not required in our case
 //!         false
