@@ -13,7 +13,8 @@ use rand::{Rand, Rng, XorShiftRng};
 
 use rdxsort::*;
 
-pub static CFG_N: usize = 10_000;
+pub const CFG_N: usize = 10_000;
+pub const CFG_M: usize = 10;
 
 fn is_sorted<T>(data: &Vec<T>) -> bool
     where T: Clone,
@@ -132,9 +133,12 @@ pub fn test_rnd_generic<T>(vspecial: Vec<T>)
     let mut data: Vec<T> = rng.gen_iter::<T>().take(CFG_N).collect();
     let mut positions: Vec<usize> = (0..(CFG_N + 1)).collect();
     rng.shuffle(&mut positions[..]);
-    assert!(vspecial.len() < CFG_N, "to many special values to test!");
-    for (i, x) in positions.into_iter().zip(vspecial.into_iter()) {
-        data[i] = x;
+    assert!(vspecial.len() * CFG_M < CFG_N, "to many special values to test!");
+    for (i, x) in vspecial.into_iter().enumerate() {
+        for j in 0..CFG_M {
+            let pos = positions[i * CFG_M + j];
+            data[pos] = x.clone();
+        }
     }
     assert!(data.len() == CFG_N, "generated data has wrong length!");
     assert!(guess_entropy(&data) >= entropy_threshold, "generated data does not contain enough entropy!");
