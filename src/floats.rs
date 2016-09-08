@@ -4,11 +4,11 @@ use std::cmp;
 use std::mem;
 
 macro_rules! impl_rdxsort {
-    ($t:ty, $alias:ty, $zero:expr) => {
+    ($t:ty, $alias:ty, $mask:expr) => {
         impl RdxSortTemplate for $t {
             #[inline]
             fn cfg_nbuckets() -> usize {
-                cmp::max(<$alias as RdxSortTemplate>::cfg_nbuckets(), 6)
+                cmp::max(<$alias as RdxSortTemplate>::cfg_nbuckets(), 2)
             }
 
             #[inline]
@@ -18,39 +18,29 @@ macro_rules! impl_rdxsort {
 
             #[inline]
             fn get_bucket(&self, round: usize) -> usize {
+                let alias = unsafe { mem::transmute::<$t, $alias>(*self) };
                 if round < <$alias as RdxSortTemplate>::cfg_nrounds() {
-                    let alias = unsafe { mem::transmute::<$t, $alias>(*self) };
                     alias.get_bucket(round)
                 } else {
-                    if self.is_normal() {
-                        if *self > $zero {
-                            4
-                        } else {
+                    if self.is_nan() {
+                        panic!("Sorting of NaNs is not implemented!");
+                    } else {
+                        if (alias & $mask) == 0 {
                             1
-                        }
-                    } else if *self == $zero {
-                        3
-                    } else if *self == -$zero {
-                        2
-                    } else if self.is_infinite() {
-                        if *self > $zero {
-                            5
                         } else {
                             0
                         }
-                    } else {
-                        panic!("Sorting of NaNs and subnormals is not implemented!");
                     }
                 }
             }
 
             #[inline]
             fn reverse(round: usize, bucket: usize) -> bool {
-                round == <$alias as RdxSortTemplate>::cfg_nrounds() && bucket == 1
+                round == <$alias as RdxSortTemplate>::cfg_nrounds() && bucket == 0
             }
         }
     }
 }
 
-impl_rdxsort!(f32, u32, 0f32);
-impl_rdxsort!(f64, u64, 0f64);
+impl_rdxsort!(f32, u32, 0x80000000u32);
+impl_rdxsort!(f64, u64, 0x8000000000000000u64);

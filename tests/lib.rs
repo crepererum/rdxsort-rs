@@ -456,7 +456,7 @@ mod sub_f32 {
 
     #[test]
     fn test_rnd_f32() {
-        test_rnd_generic::<f32>(vec![-f32::INFINITY, -0f32, 0f32, f32::INFINITY]);
+        test_rnd_generic::<f32>(vec![-f32::INFINITY, -1.0e-40_f32, -1.0e-41_f32, -0f32, 0f32, 1.0e-41_f32, 1.0e-40_f32, f32::INFINITY]);
     }
 
     #[test]
@@ -477,7 +477,7 @@ mod sub_f64 {
 
     #[test]
     fn test_rnd_f64() {
-        test_rnd_generic::<f64>(vec![-f64::INFINITY, -0f64, 0f64, f64::INFINITY]);
+        test_rnd_generic::<f64>(vec![-f64::INFINITY, -1.0e-308_f64, -1.0e-309_f64, -0f64, 0f64, 1.0e-309_f64, 1.0e-308_f64, f64::INFINITY]);
     }
 
     #[test]
