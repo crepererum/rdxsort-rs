@@ -1,25 +1,25 @@
-use template::RdxSortTemplate;
+use template::Rdx;
 
 use std::cmp;
 use std::mem;
 
 macro_rules! impl_rdxsort {
     ($t:ty, $alias:ty, $mask:expr) => {
-        impl RdxSortTemplate for $t {
+        impl Rdx for $t {
             #[inline]
             fn cfg_nbuckets() -> usize {
-                cmp::max(<$alias as RdxSortTemplate>::cfg_nbuckets(), 2)
+                cmp::max(<$alias as Rdx>::cfg_nbuckets(), 2)
             }
 
             #[inline]
             fn cfg_nrounds() -> usize {
-                <$alias as RdxSortTemplate>::cfg_nrounds() + 1
+                <$alias as Rdx>::cfg_nrounds() + 1
             }
 
             #[inline]
             fn get_bucket(&self, round: usize) -> usize {
                 let alias = unsafe { mem::transmute::<$t, $alias>(*self) };
-                if round < <$alias as RdxSortTemplate>::cfg_nrounds() {
+                if round < <$alias as Rdx>::cfg_nrounds() {
                     alias.get_bucket(round)
                 } else {
                     if self.is_nan() {
@@ -36,7 +36,7 @@ macro_rules! impl_rdxsort {
 
             #[inline]
             fn reverse(round: usize, bucket: usize) -> bool {
-                round == <$alias as RdxSortTemplate>::cfg_nrounds() && bucket == 0
+                round == <$alias as Rdx>::cfg_nrounds() && bucket == 0
             }
         }
     }

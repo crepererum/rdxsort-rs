@@ -1,6 +1,6 @@
-use template::RdxSortTemplate;
+use template::Rdx;
 
-impl RdxSortTemplate for bool {
+impl Rdx for bool {
     #[inline]
     fn cfg_nbuckets() -> usize {
         2

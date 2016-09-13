@@ -122,7 +122,7 @@
 //!
 //! ## Implementing New Types
 //!
-//! This crate enables you to add support for new types by implementing `RdxSortTemplate`. It
+//! This crate enables you to add support for new types by implementing `Rdx`. It
 //! describes how data is sorted into buckets and how many rounds of sorting are scheduled.
 //!
 //! ```
@@ -136,7 +136,7 @@
 //!     b: u8,
 //! }
 //!
-//! impl RdxSortTemplate for Foo {
+//! impl Rdx for Foo {
 //!     // using `#[inline]` is generally recommended since it helps
 //!     // the compiler to optimize the sorting algorithm
 //!     #[inline]
@@ -206,4 +206,4 @@ mod signed_integer;
 mod tuple;
 mod unsigned_integer;
 
-pub use template::RdxSortTemplate;
+pub use template::Rdx;

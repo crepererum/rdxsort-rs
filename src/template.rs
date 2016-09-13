@@ -17,7 +17,7 @@ use std::mem;
 ///
 /// **WARNING: The result returned from `get_bucket()` is not checked. Wrong implementations may
 /// crash the program, or destroy the world, or both!!!**
-pub trait RdxSortTemplate {
+pub trait Rdx {
     /// Sets the number of buckets used by the generic implementation.
     fn cfg_nbuckets() -> usize;
 
@@ -45,15 +45,15 @@ pub trait RdxSortTemplate {
 #[macro_export]
 macro_rules! rdxsort_template_alias {
     ($t1:ty = $t2:ty) => {
-        impl RdxSortTemplate for $t1 {
+        impl Rdx for $t1 {
             #[inline]
             fn cfg_nbuckets() -> usize {
-                <$t2 as RdxSortTemplate>::cfg_nbuckets()
+                <$t2 as Rdx>::cfg_nbuckets()
             }
 
             #[inline]
             fn cfg_nrounds() -> usize {
-                <$t2 as RdxSortTemplate>::cfg_nrounds()
+                <$t2 as Rdx>::cfg_nrounds()
             }
 
             #[inline]
@@ -64,7 +64,7 @@ macro_rules! rdxsort_template_alias {
 
             #[inline]
             fn reverse(round: usize, bucket: usize) -> bool {
-                <$t2 as RdxSortTemplate>::reverse(round, bucket)
+                <$t2 as Rdx>::reverse(round, bucket)
             }
         }
     }
@@ -72,20 +72,20 @@ macro_rules! rdxsort_template_alias {
 
 #[inline]
 fn helper_bucket<T, I>(buckets_b: &mut Vec<Vec<T>>, iter: I, cfg_nbuckets: usize, round: usize)
-    where T: RdxSortTemplate,
+    where T: Rdx,
           I: Iterator<Item = T>
 {
     for x in iter {
         let b = x.get_bucket(round);
         assert!(b < cfg_nbuckets,
-                "Your RdxSortTemplate implementation returns a bucket >= cfg_nbuckets()!");
+                "Your Rdx implementation returns a bucket >= cfg_nbuckets()!");
         unsafe {
             buckets_b.get_unchecked_mut(b).push(x);
         }
     }
 }
 
-impl<T> RdxSort for [T] where T: RdxSortTemplate + Clone
+impl<T> RdxSort for [T] where T: Rdx + Clone
 {
     fn rdxsort(&mut self) {
         // config

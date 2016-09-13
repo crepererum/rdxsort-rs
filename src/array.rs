@@ -1,8 +1,8 @@
-use template::RdxSortTemplate;
+use template::Rdx;
 
 macro_rules! impl_rdxsort {
     ($n:expr) => {
-        impl<T> RdxSortTemplate for [T; $n] where T: RdxSortTemplate {
+        impl<T> Rdx for [T; $n] where T: Rdx {
             #[inline]
             fn cfg_nbuckets() -> usize {
                 T::cfg_nbuckets()

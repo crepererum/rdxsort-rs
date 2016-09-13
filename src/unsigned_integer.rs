@@ -1,6 +1,6 @@
-use template::RdxSortTemplate;
+use template::Rdx;
 
-impl RdxSortTemplate for u8 {
+impl Rdx for u8 {
     #[inline]
     fn cfg_nbuckets() -> usize {
         16
@@ -23,7 +23,7 @@ impl RdxSortTemplate for u8 {
     }
 }
 
-impl RdxSortTemplate for u16 {
+impl Rdx for u16 {
     #[inline]
     fn cfg_nbuckets() -> usize {
         16
@@ -46,7 +46,7 @@ impl RdxSortTemplate for u16 {
     }
 }
 
-impl RdxSortTemplate for u32 {
+impl Rdx for u32 {
     #[inline]
     fn cfg_nbuckets() -> usize {
         16
@@ -69,7 +69,7 @@ impl RdxSortTemplate for u32 {
     }
 }
 
-impl RdxSortTemplate for u64 {
+impl Rdx for u64 {
     #[inline]
     fn cfg_nbuckets() -> usize {
         16

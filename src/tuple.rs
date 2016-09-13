@@ -1,8 +1,8 @@
-use template::RdxSortTemplate;
+use template::Rdx;
 
 use std::cmp;
 
-impl RdxSortTemplate for () {
+impl Rdx for () {
     #[inline]
     fn cfg_nbuckets() -> usize {
         0
@@ -24,7 +24,7 @@ impl RdxSortTemplate for () {
     }
 }
 
-impl<A> RdxSortTemplate for (A,) where A: RdxSortTemplate
+impl<A> Rdx for (A,) where A: Rdx
 {
     #[inline]
     fn cfg_nbuckets() -> usize {
@@ -47,9 +47,9 @@ impl<A> RdxSortTemplate for (A,) where A: RdxSortTemplate
     }
 }
 
-impl<A, B> RdxSortTemplate for (A, B)
-    where A: RdxSortTemplate,
-          B: RdxSortTemplate
+impl<A, B> Rdx for (A, B)
+    where A: Rdx,
+          B: Rdx
 {
     #[inline]
     fn cfg_nbuckets() -> usize {
@@ -80,10 +80,10 @@ impl<A, B> RdxSortTemplate for (A, B)
     }
 }
 
-impl<A, B, C> RdxSortTemplate for (A, B, C)
-    where A: RdxSortTemplate,
-          B: RdxSortTemplate,
-          C: RdxSortTemplate
+impl<A, B, C> Rdx for (A, B, C)
+    where A: Rdx,
+          B: Rdx,
+          C: Rdx
 {
     #[inline]
     fn cfg_nbuckets() -> usize {
