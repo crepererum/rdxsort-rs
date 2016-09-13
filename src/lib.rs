@@ -23,9 +23,8 @@
 //! - **unsigned integers:** native implementation, depending on the width
 //! - **signed integers:** splitting into positive and negative parts and using the unsigned
 //!   implementation
-//! - **floats:** splits data into `-∞`, `(-∞,-0)`, `-0`, `+0`, `(+0,+∞)`, `+∞` and treating the two
-//!   ranges as unsigned integer values. [Subnormals](https://en.wikipedia.org/wiki/Denormal_number)
-//!   and `NaN`s are not supported!
+//! - **floats:** splitting of data into positive and negative numbers and treating the two
+//!   ranges as unsigned integer values. `NaN`s are not supported!
 //! - **arrays, tuples:** use the implementation of the inner data types
 //! - *custom data types...: fill in the provided template trait*
 //!
