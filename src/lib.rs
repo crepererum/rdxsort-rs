@@ -255,15 +255,7 @@ macro_rules! rdx_alias {
     }
 }
 
-
-mod array;
-mod bool;
-mod char;
-mod floats;
-mod signed_integer;
-mod tuple;
-mod unsigned_integer;
-
 mod sort;
+mod types;
 
 pub use sort::RdxSort;
