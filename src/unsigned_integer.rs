@@ -93,10 +93,10 @@ impl Rdx for u64 {
 }
 
 #[cfg(target_pointer_width = "16")]
-rdxsort_template_alias!(usize = u16);
+rdx_alias!(usize = u16);
 
 #[cfg(target_pointer_width = "32")]
-rdxsort_template_alias!(usize = u32);
+rdx_alias!(usize = u32);
 
 #[cfg(target_pointer_width = "64")]
-rdxsort_template_alias!(usize = u64);
+rdx_alias!(usize = u64);

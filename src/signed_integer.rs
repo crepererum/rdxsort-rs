@@ -47,10 +47,10 @@ impl_rdxsort!(i32, u32, i32::min_value(), 0i32);
 impl_rdxsort!(i64, u64, i64::min_value(), 0i64);
 
 #[cfg(target_pointer_width = "16")]
-rdxsort_template_alias!(isize = i16);
+rdx_alias!(isize = i16);
 
 #[cfg(target_pointer_width = "32")]
-rdxsort_template_alias!(isize = i32);
+rdx_alias!(isize = i32);
 
 #[cfg(target_pointer_width = "64")]
-rdxsort_template_alias!(isize = i64);
+rdx_alias!(isize = i64);

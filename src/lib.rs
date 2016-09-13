@@ -228,7 +228,7 @@ pub trait Rdx {
 
 /// Implements `t1` as alias of `t2`, e.g. `usize = u64` on platforms that have 64 bit pointers.
 #[macro_export]
-macro_rules! rdxsort_template_alias {
+macro_rules! rdx_alias {
     ($t1:ty = $t2:ty) => {
         impl Rdx for $t1 {
             #[inline]

@@ -1,3 +1,3 @@
 use super::Rdx;
 
-rdxsort_template_alias!(char = u32);
+rdx_alias!(char = u32);
