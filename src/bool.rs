@@ -1,4 +1,4 @@
-use template::Rdx;
+use super::Rdx;
 
 impl Rdx for bool {
     #[inline]

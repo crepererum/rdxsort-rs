@@ -1,4 +1,4 @@
-use template::Rdx;
+use super::Rdx;
 
 use std::cmp;
 use std::mem;

@@ -1,4 +1,4 @@
-use template::Rdx;
+use super::Rdx;
 
 macro_rules! impl_rdxsort {
     ($n:expr) => {

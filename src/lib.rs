@@ -190,13 +190,71 @@
 
 extern crate core;
 
-/// Radix Sort implementation for some type
-pub trait RdxSort {
-    /// Execute Radix Sort, overwrites (unsorted) content of the type.
-    fn rdxsort(&mut self);
+/// Generic Radix Sort implementation
+///
+/// Works by splitting the work in rounds. During every round, the data is sorted into buckets and
+/// is then collected again. Rounds are count from `0` to (exclusive) `cfg_nrounds()`.
+///
+/// The number of buckets is fixed for all rounds. That does not mean that the template has to use
+/// all of them, since unused buckets are just empty and have no effect on the collected results.
+/// Same hold for the number of rounds. Over-booking one or both of them wastes resources of
+/// course.
+///
+/// **WARNING: The result returned from `get_bucket()` is not checked. Wrong implementations may
+/// crash the program, or destroy the world, or both!!!**
+pub trait Rdx {
+    /// Sets the number of buckets used by the generic implementation.
+    fn cfg_nbuckets() -> usize;
+
+    /// Sets the number of rounds scheduled by the generic implementation.
+    fn cfg_nrounds() -> usize;
+
+    /// Returns the bucket, depending on the round.
+    ///
+    /// This should respect the radix, e.g.:
+    ///
+    /// - if the number of buckets is `2` and the type is an unsigned integer, then the result is
+    ///   the bit starting with the least significant one.
+    /// - if the number of buckets is `8` and the type is an unsigned integer, then the result is
+    ///   the byte starting with the least significant one.
+    ///
+    /// **Never** return a bucker greater or equal the number of buckets. See warning above!
+    fn get_bucket(&self, round: usize) -> usize;
+
+    /// Describes the fact that the content of a bucket should be copied back in reverse order
+    /// after a certain round.
+    fn reverse(round: usize, bucket: usize) -> bool;
 }
 
-#[macro_use] mod template;
+/// Implements `t1` as alias of `t2`, e.g. `usize = u64` on platforms that have 64 bit pointers.
+#[macro_export]
+macro_rules! rdxsort_template_alias {
+    ($t1:ty = $t2:ty) => {
+        impl Rdx for $t1 {
+            #[inline]
+            fn cfg_nbuckets() -> usize {
+                <$t2 as Rdx>::cfg_nbuckets()
+            }
+
+            #[inline]
+            fn cfg_nrounds() -> usize {
+                <$t2 as Rdx>::cfg_nrounds()
+            }
+
+            #[inline]
+            fn get_bucket(&self, round: usize) -> usize {
+                (*self as $t2).get_bucket(round)
+            }
+
+
+            #[inline]
+            fn reverse(round: usize, bucket: usize) -> bool {
+                <$t2 as Rdx>::reverse(round, bucket)
+            }
+        }
+    }
+}
+
 
 mod array;
 mod bool;
@@ -206,4 +264,6 @@ mod signed_integer;
 mod tuple;
 mod unsigned_integer;
 
-pub use template::Rdx;
+mod sort;
+
+pub use sort::RdxSort;
