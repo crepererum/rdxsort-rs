@@ -256,6 +256,8 @@ macro_rules! rdx_alias {
 }
 
 mod sort;
+mod tree;
 mod types;
 
 pub use sort::RdxSort;
+pub use tree::RdxTree;
