@@ -18,7 +18,7 @@
 //!
 //! Currently, the following data types are supported:
 //!
-//! - **bool:** simple split into 2 junks
+//! - **bool:** simple split into 2 chunks
 //! - **char:** behaves like `u32`
 //! - **unsigned integers:** native implementation, depending on the width
 //! - **signed integers:** splitting into positive and negative parts and using the unsigned
