@@ -267,15 +267,15 @@ impl<T> RdxTree<T> where T: Clone + Rdx {
     }
 
     pub fn iter<'a>(&'a self) -> RdxTreeIter<'a, T> {
-        let mut iters = Vec::new();
+        let mut stack = Vec::new();
         match self.root {
             Node::Inner(ref inner) => {
-                iters.push((inner.clone(), 0));
+                stack.push(((inner.clone(), 1, false)));
             },
             _ => unreachable!(),
         }
         RdxTreeIter {
-            iters: iters,
+            stack: stack,
             phantom: PhantomData,
         }
     }
@@ -294,8 +294,14 @@ impl<T> RdxTree<T> where T: Clone + Rdx {
 
 
 pub struct RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
-    iters: Vec<(Rc<RefCell<NodeInner<T>>>, usize)>,  // do not work with iterators directly since we need a checked but dynamic borrow
-    phantom: PhantomData<&'a RdxTree<T>>,            // keep tree borrow intact
+    // iterator stack:
+    //   - reference to inner node (do not work with iterators directly since we need a checked but dynamic borrow)
+    //   - current iterator state + 1 (so `0` encodes the "the one BEFORE beginning)
+    //   - reverse the iterator order for this subpart if `True`
+    stack: Vec<(Rc<RefCell<NodeInner<T>>>, usize, bool)>,
+
+    // keep tree borrow intact
+    phantom: PhantomData<&'a RdxTree<T>>,
 }
 
 
@@ -303,51 +309,91 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
     type Item = T;  // XXX: do not copy!
 
     fn next(&mut self) -> Option<Self::Item> {
+        // the iteration is basically the processing of a stack machine
+
         let mut result: Option<T> = None;
 
-        while self.iters.len() > 0 && result.is_none() {
-            let mut push: Option<Rc<RefCell<NodeInner<T>>>> = None;
+        // iterate until stack is empty or we have a result
+        while !self.stack.is_empty() && result.is_none() {
+            // the stack is immutable since we work with the current state,
+            // therefore we need to store pending operations (push or pop) and execute afterwards
+            let mut push: Option<(Rc<RefCell<NodeInner<T>>>, bool)> = None;
             let mut pop = false;
+            let stacksize = self.stack.len();
 
-            if let Some(pair) = self.iters.last_mut() {
-                let &mut (ref rc, ref mut i) = pair;
-                let borrow = rc.borrow();
-                if *i >= borrow.children.len() {
+            if let Some(state) = self.stack.last_mut() {
+                let &mut (ref rc, ref mut i, reverse) = state;
+                let borrowed = rc.borrow();
+
+                // bounds check for current iterator state
+                if (reverse && (*i == 0)) || (*i >= borrowed.children.len() + 1) {
                     pop = true;
                 } else {
-                    match borrow.children[*i] {
-                        Node::Free => {},
+                    // bounds are fine => inspect current sub-element
+                    match borrowed.children[*i - 1] {
+                        Node::Free => {
+                            // it's a free node, we can ignore that and continue with the iteration
+                        },
                         Node::Child(ref x) => {
+                            // we have found some usable data :)
                             result = Some(x.clone());
                         },
                         Node::Inner(ref inner) => {
-                            push = Some(inner.clone());
+                            // inner node => push a new state to the stack
+                            let round = <T as Rdx>::cfg_nrounds() - stacksize;
+                            let rev = reverse ^ <T as Rdx>::reverse(round, *i - 1);
+                            push = Some((inner.clone(), rev));
                         },
                         Node::Pruned(ref pruned) => {
-                            match pruned.borrow().child {
+                            // pruned tree part => let's check what the child is
+                            let borrowed2 = pruned.borrow();
+                            match borrowed2.child {
                                 NodeLimited::Child(ref x) => {
+                                    // usable data :)
                                     result = Some(x.clone());
                                 },
                                 NodeLimited::Inner(ref inner) => {
-                                    push = Some(inner.clone());
+                                    // simulate traversal of pruned tree part to recover `reverse`
+                                    let mut round = <T as Rdx>::cfg_nrounds() - stacksize;
+                                    let mut rev = reverse ^ <T as Rdx>::reverse(round, *i - 1);
+                                    for j in &borrowed2.buckets {
+                                        round += 1;
+                                        rev ^= <T as Rdx>::reverse(round, j.clone());
+                                    }
+
+                                    push = Some((inner.clone(), rev));
                                 },
                             }
                         },
                     }
 
-                    *i += 1;
+                    if reverse {
+                        *i -= 1;
+                    } else {
+                        *i += 1;
+                    }
                 }
             } else {
+                // that cannot happen since we have already checked if the stack is not empty
                 unreachable!();
             }
 
+            // execute all pending operations
             if pop {
-                self.iters.pop();
-            } else if let Some(next) = push {
-                self.iters.push((next, 0));
+                self.stack.pop();
+            } else if let Some((next, rev)) = push {
+                // the iteration of the next stack part starts either at the beginning or end,
+                // depending on the fact that it is a reversed iteration or not
+                let idx_start = if rev {
+                    next.borrow().children.len()
+                } else {
+                    1
+                };
+                self.stack.push((next, idx_start, rev));
             }
         }
 
+        // this can be `None` here in case we've finished iteration and the stack is empty
         result
     }
 }
@@ -396,4 +442,21 @@ fn test_insert() {
     let is: Vec<u32> = tree.iter().collect();
     assert_eq!(should, is);
     assert_eq!(tree.nnodes(), (4, 3, 5, 56));
+}
+
+#[test]
+fn test_insert_float() {
+    let mut tree: RdxTree<f32> = RdxTree::new();
+    tree.insert(1f32);
+    tree.insert(22f32);
+    tree.insert(2f32);
+    tree.insert(-1024f32);
+    tree.insert(-1f32);
+    tree.insert(1024f32);
+    tree.insert(0f32);
+
+    let should = vec![-1024f32, -1f32, 0f32, 1f32, 2f32, 22f32, 1024f32];
+    let is: Vec<f32> = tree.iter().collect();
+    assert_eq!(should, is);
+    assert_eq!(tree.nnodes(), (4, 7, 7, 54));
 }
