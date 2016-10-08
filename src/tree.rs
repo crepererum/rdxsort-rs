@@ -21,6 +21,37 @@ enum Node<T>
 }
 
 
+impl<T> Node<T>
+    where T: Clone + Rdx
+{
+    fn print(&self, depth: usize)
+        where T: fmt::Display
+    {
+        let prefix: String = (0..depth).map(|_| ' ').collect();
+        match *self {
+            Node::Inner(ref inner) => {
+                for (i, c) in inner.borrow().children.iter().enumerate() {
+                    println!("{}{}:", prefix, i);
+                    c.print(depth + 1);
+                }
+            }
+            Node::Pruned(ref pruned) => {
+                let borrowed = pruned.borrow();
+                println!("{}P: [{:?}]", prefix, borrowed.buckets);
+                let c: Node<T> = (&(borrowed.child)).into();
+                c.print(depth + borrowed.buckets.len());
+            }
+            Node::Child(ref x) => {
+                println!("{}=> {}", prefix, x);
+            }
+            Node::Free => {
+                println!("{}X", prefix);
+            }
+        }
+    }
+}
+
+
 #[derive(Clone)]
 enum NodeLimited<T>
     where T: Clone + Rdx
@@ -302,6 +333,12 @@ impl<T> RdxTree<T>
             _ => unreachable!(),
         }
     }
+
+    pub fn print(&self)
+        where T: fmt::Display
+    {
+        self.root.print(0);
+    }
 }
 
 
@@ -409,71 +446,4 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T>
         // this can be `None` here in case we've finished iteration and the stack is empty
         result
     }
-}
-
-
-fn print_node<T>(node: &Node<T>, depth: usize)
-    where T: Clone + fmt::Display + Rdx
-{
-    let prefix: String = (0..depth).map(|_| ' ').collect();
-    match *node {
-        Node::Inner(ref inner) => {
-            for (i, c) in inner.borrow().children.iter().enumerate() {
-                println!("{}{}:", prefix, i);
-                print_node(c, depth + 1);
-            }
-        }
-        Node::Pruned(ref pruned) => {
-            let borrowed = pruned.borrow();
-            println!("{}P: [{:?}]", prefix, borrowed.buckets);
-            let c = (&(borrowed.child)).into();
-            print_node(&c, depth + borrowed.buckets.len());
-        }
-        Node::Child(ref x) => {
-            println!("{}=> {}", prefix, x);
-        }
-        Node::Free => {
-            println!("{}X", prefix);
-        }
-    }
-}
-
-
-fn print_tree<T>(tree: &RdxTree<T>)
-    where T: Clone + fmt::Display + Rdx
-{
-    print_node(&tree.root, 0);
-}
-
-
-#[test]
-fn test_insert() {
-    let mut tree: RdxTree<u32> = RdxTree::new();
-    tree.insert(1);
-    tree.insert(22);
-    tree.insert(2);
-    tree.insert(1024);
-    tree.insert(0);
-
-    let should = vec![0, 1, 2, 22, 1024];
-    let is: Vec<u32> = tree.iter().collect();
-    assert_eq!(should, is);
-    assert_eq!(tree.nnodes(), (4, 3, 5, 56));
-}
-
-#[test]
-fn test_insert_float() {
-    let mut tree: RdxTree<f32> = RdxTree::new();
-    tree.insert(1f32);
-    tree.insert(22f32);
-    tree.insert(2f32);
-    tree.insert(-1024f32);
-    tree.insert(-1f32);
-    tree.insert(1024f32);
-    tree.insert(0f32);
-
-    let should = vec![-1024f32, -1f32, 0f32, 1f32, 2f32, 22f32, 1024f32];
-    let is: Vec<f32> = tree.iter().collect();
-    assert_eq!(should, is);
-    assert_eq!(tree.nnodes(), (4, 7, 7, 54));
 }

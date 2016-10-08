@@ -260,4 +260,4 @@ mod tree;
 mod types;
 
 pub use sort::RdxSort;
-pub use tree::RdxTree;
+pub use tree::{RdxTree, RdxTreeIter};
