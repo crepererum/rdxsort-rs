@@ -2,9 +2,8 @@ extern crate rand;
 extern crate rdxsort;
 
 use std::collections;
-use std::hash;
-use std::hash::Hash;
-use std::hash::Hasher;
+use std::collections::hash_map::RandomState;
+use std::hash::{BuildHasher, Hash, Hasher};
 use std::iter;
 use std::mem;
 use std::ops;
@@ -16,23 +15,20 @@ use rdxsort::*;
 pub const CFG_N: usize = 10_000;
 pub const CFG_M: usize = 10;
 
-fn is_sorted<T>(data: &Vec<T>) -> bool
+fn is_sorted<T>(data: &[T]) -> bool
     where T: Clone,
           T: PartialOrd
 {
     let mut last_entry: Option<T> = None;
     for x in data.iter().cloned() {
-        match last_entry {
-            Some(l) => {
-                if !(l.le(&x)) {
-                    return false;
-                }
+        if let Some(l) = last_entry {
+            if !(l.le(&x)) {
+                return false;
             }
-            None => {}
         }
         last_entry = Some(x);
     }
-    return true;
+    true
 }
 
 pub trait MyHash {
@@ -81,11 +77,11 @@ impl MyHash for f64 {
     }
 }
 
-fn guess_entropy<T>(data: &Vec<T>) -> f64 where T: MyHash {
+fn guess_entropy<T>(data: &[T]) -> f64 where T: MyHash {
     let mut counter = collections::HashMap::<u64, usize>::new();
 
     for x in data {
-        let mut hasher = hash::SipHasher::new();
+        let mut hasher = RandomState::new().build_hasher();
         x.hash_it(&mut hasher);
         let key = hasher.finish();
 

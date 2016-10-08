@@ -6,12 +6,16 @@ use std::fmt;
 use std::rc::Rc;
 
 
+type RcInner<T> = Rc<RefCell<NodeInner<T>>>;
+type RcPruned<T> = Rc<RefCell<NodePruned<T>>>;
+
+
 #[derive(Clone)]
 enum Node<T>
     where T: Clone + Rdx
 {
-    Inner(Rc<RefCell<NodeInner<T>>>),
-    Pruned(Rc<RefCell<NodePruned<T>>>),
+    Inner(RcInner<T>),
+    Pruned(RcPruned<T>),
     Child(T),
     Free,
 }
@@ -21,7 +25,7 @@ enum Node<T>
 enum NodeLimited<T>
     where T: Clone + Rdx
 {
-    Inner(Rc<RefCell<NodeInner<T>>>),
+    Inner(RcInner<T>),
     Child(T),
 }
 
@@ -30,9 +34,9 @@ impl<'a, T> From<&'a NodeLimited<T>> for Node<T>
     where T: Clone + Rdx
 {
     fn from(obj: &'a NodeLimited<T>) -> Node<T> {
-        match obj {
-            &NodeLimited::Inner(ref inner) => Node::Inner(inner.clone()),
-            &NodeLimited::Child(ref x) => Node::Child(x.clone()),
+        match *obj {
+            NodeLimited::Inner(ref inner) => Node::Inner(inner.clone()),
+            NodeLimited::Child(ref x) => Node::Child(x.clone()),
         }
     }
 }
@@ -114,26 +118,26 @@ impl<T> NodeInner<T>
 
     fn nnodes(&self) -> (usize, usize, usize, usize) {
         let mut result = (1, 0, 0, 0);
-        for c in self.children.iter() {
-            match c {
-                &Node::Inner(ref inner) => {
+        for c in &self.children {
+            match *c {
+                Node::Inner(ref inner) => {
                     let tmp = inner.borrow().nnodes();
                     result.0 += tmp.0;
                     result.1 += tmp.1;
                     result.2 += tmp.2;
                     result.3 += tmp.3;
                 }
-                &Node::Pruned(ref pruned) => {
+                Node::Pruned(ref pruned) => {
                     let tmp = pruned.borrow().nnodes();
                     result.0 += tmp.0;
                     result.1 += tmp.1;
                     result.2 += tmp.2;
                     result.3 += tmp.3;
                 }
-                &Node::Child(_) => {
+                Node::Child(_) => {
                     result.2 += 1;
                 }
-                &Node::Free => {
+                Node::Free => {
                     result.3 += 1;
                 }
             }
@@ -278,7 +282,7 @@ impl<T> RdxTree<T>
         }
     }
 
-    pub fn iter<'a>(&'a self) -> RdxTreeIter<'a, T> {
+    pub fn iter<'a>(&self) -> RdxTreeIter<'a, T> {
         let mut stack = Vec::new();
         match self.root {
             Node::Inner(ref inner) => {
@@ -309,7 +313,7 @@ pub struct RdxTreeIter<'a, T>
     //     (do not work with iterators directly since we need a checked but dynamic borrow)
     //   - current iterator state + 1 (so `0` encodes the "the one BEFORE beginning)
     //   - reverse the iterator order for this subpart if `True`
-    stack: Vec<(Rc<RefCell<NodeInner<T>>>, usize, bool)>,
+    stack: Vec<(RcInner<T>, usize, bool)>,
 
     // keep tree borrow intact
     phantom: PhantomData<&'a RdxTree<T>>,
@@ -371,7 +375,7 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T>
                                     let mut rev = reverse ^ <T as Rdx>::reverse(round, *i - 1);
                                     for j in &borrowed2.buckets {
                                         round += 1;
-                                        rev ^= <T as Rdx>::reverse(round, j.clone());
+                                        rev ^= <T as Rdx>::reverse(round, *j);
                                     }
 
                                     push = Some((inner.clone(), rev));
