@@ -26,7 +26,8 @@ fn helper_bucket<T, I>(buckets_b: &mut Vec<Vec<T>>, iter: I, cfg_nbuckets: usize
     }
 }
 
-impl<T> RdxSort for [T] where T: Rdx + Clone
+impl<T> RdxSort for [T]
+    where T: Rdx + Clone
 {
     fn rdxsort(&mut self) {
         // config
@@ -92,7 +93,8 @@ impl<T> RdxSort for [T] where T: Rdx + Clone
     }
 }
 
-impl<T> RdxSort for Vec<T> where [T]: RdxSort
+impl<T> RdxSort for Vec<T>
+    where [T]: RdxSort
 {
     fn rdxsort(&mut self) {
         self.as_mut_slice().rdxsort();

@@ -29,16 +29,16 @@ macro_rules! impl_rdxsort {
     }
 }
 
-impl_rdxsort!( 0);
-impl_rdxsort!( 1);
-impl_rdxsort!( 2);
-impl_rdxsort!( 3);
-impl_rdxsort!( 4);
-impl_rdxsort!( 5);
-impl_rdxsort!( 6);
-impl_rdxsort!( 7);
-impl_rdxsort!( 8);
-impl_rdxsort!( 9);
+impl_rdxsort!(0);
+impl_rdxsort!(1);
+impl_rdxsort!(2);
+impl_rdxsort!(3);
+impl_rdxsort!(4);
+impl_rdxsort!(5);
+impl_rdxsort!(6);
+impl_rdxsort!(7);
+impl_rdxsort!(8);
+impl_rdxsort!(9);
 impl_rdxsort!(10);
 impl_rdxsort!(11);
 impl_rdxsort!(12);

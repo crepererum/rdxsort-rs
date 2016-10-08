@@ -24,7 +24,8 @@ impl Rdx for () {
     }
 }
 
-impl<A> Rdx for (A,) where A: Rdx
+impl<A> Rdx for (A,)
+    where A: Rdx
 {
     #[inline]
     fn cfg_nbuckets() -> usize {

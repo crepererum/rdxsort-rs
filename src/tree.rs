@@ -7,7 +7,9 @@ use std::rc::Rc;
 
 
 #[derive(Clone)]
-enum Node<T> where T: Clone + Rdx {
+enum Node<T>
+    where T: Clone + Rdx
+{
     Inner(Rc<RefCell<NodeInner<T>>>),
     Pruned(Rc<RefCell<NodePruned<T>>>),
     Child(T),
@@ -16,13 +18,17 @@ enum Node<T> where T: Clone + Rdx {
 
 
 #[derive(Clone)]
-enum NodeLimited<T> where T: Clone + Rdx {
+enum NodeLimited<T>
+    where T: Clone + Rdx
+{
     Inner(Rc<RefCell<NodeInner<T>>>),
     Child(T),
 }
 
 
-impl<'a, T> From<&'a NodeLimited<T>> for Node<T> where T: Clone + Rdx {
+impl<'a, T> From<&'a NodeLimited<T>> for Node<T>
+    where T: Clone + Rdx
+{
     fn from(obj: &'a NodeLimited<T>) -> Node<T> {
         match obj {
             &NodeLimited::Inner(ref inner) => Node::Inner(inner.clone()),
@@ -33,14 +39,18 @@ impl<'a, T> From<&'a NodeLimited<T>> for Node<T> where T: Clone + Rdx {
 
 
 #[derive(Clone)]
-struct NodeInner<T> where T: Clone + Rdx {
+struct NodeInner<T>
+    where T: Clone + Rdx
+{
     round: usize,
     children: Vec<Node<T>>,
 }
 
 
 #[derive(Clone)]
-struct NodePruned<T> where T: Clone + Rdx {
+struct NodePruned<T>
+    where T: Clone + Rdx
+{
     round: usize,
     nbuckets: usize,
     buckets: Vec<usize>,
@@ -48,7 +58,9 @@ struct NodePruned<T> where T: Clone + Rdx {
 }
 
 
-impl<T> NodeInner<T> where T: Clone + Rdx {
+impl<T> NodeInner<T>
+    where T: Clone + Rdx
+{
     fn new(round: usize, nbuckets: usize) -> NodeInner<T> {
         let mut children = Vec::with_capacity(nbuckets);
         for _ in 0..nbuckets {
@@ -69,14 +81,12 @@ impl<T> NodeInner<T> where T: Clone + Rdx {
                 Node::Free => {
                     let pruned = Rc::new(RefCell::new(NodePruned::new(self.round - 1, clen, x)));
                     Some(Node::Pruned(pruned))
-                },
+                }
                 Node::Inner(ref mut inner) => {
                     inner.borrow_mut().insert(x);
                     None
-                },
-                Node::Pruned(ref mut pruned) => {
-                    Some(pruned.borrow().insert_or_split(x))
                 }
+                Node::Pruned(ref mut pruned) => Some(pruned.borrow().insert_or_split(x)),
                 Node::Child(_) => unreachable!(),
             };
 
@@ -112,20 +122,20 @@ impl<T> NodeInner<T> where T: Clone + Rdx {
                     result.1 += tmp.1;
                     result.2 += tmp.2;
                     result.3 += tmp.3;
-                },
+                }
                 &Node::Pruned(ref pruned) => {
                     let tmp = pruned.borrow().nnodes();
                     result.0 += tmp.0;
                     result.1 += tmp.1;
                     result.2 += tmp.2;
                     result.3 += tmp.3;
-                },
+                }
                 &Node::Child(_) => {
                     result.2 += 1;
-                },
+                }
                 &Node::Free => {
                     result.3 += 1;
-                },
+                }
             }
         }
         result
@@ -133,7 +143,9 @@ impl<T> NodeInner<T> where T: Clone + Rdx {
 }
 
 
-impl<T> NodePruned<T> where T: Clone + Rdx {
+impl<T> NodePruned<T>
+    where T: Clone + Rdx
+{
     fn new(round: usize, nbuckets: usize, x: T) -> NodePruned<T> {
         let mut buckets = Vec::with_capacity(round);
         for i in 0..round {
@@ -212,10 +224,10 @@ impl<T> NodePruned<T> where T: Clone + Rdx {
         match cpy.child {
             NodeLimited::Inner(ref mut inner) => {
                 inner.borrow_mut().insert(x);
-            },
+            }
             NodeLimited::Child(ref mut y) => {
                 *y = x;
-            },
+            }
         }
         Node::Pruned(Rc::new(RefCell::new(cpy)))
     }
@@ -229,37 +241,37 @@ impl<T> NodePruned<T> where T: Clone + Rdx {
                 result.1 += tmp.1;
                 result.2 += tmp.2;
                 result.3 += tmp.3;
-            },
+            }
             NodeLimited::Child(_) => {
                 result.2 += 1;
-            },
+            }
         }
         result
     }
 }
 
 
-pub struct RdxTree<T> where T: Clone + Rdx {
+pub struct RdxTree<T>
+    where T: Clone + Rdx
+{
     root: Node<T>,
 }
 
 
-impl<T> RdxTree<T> where T: Clone + Rdx {
+impl<T> RdxTree<T>
+    where T: Clone + Rdx
+{
     pub fn new() -> RdxTree<T> {
         let rounds = <T as Rdx>::cfg_nrounds();
         let buckets = <T as Rdx>::cfg_nbuckets();
-        RdxTree {
-            root: Node::Inner(
-                Rc::new(RefCell::new(NodeInner::<T>::new(rounds, buckets)))
-            ),
-        }
+        RdxTree { root: Node::Inner(Rc::new(RefCell::new(NodeInner::<T>::new(rounds, buckets)))) }
     }
 
     pub fn insert(&mut self, x: T) {
         match self.root {
             Node::Inner(ref mut inner) => {
                 inner.borrow_mut().insert(x);
-            },
+            }
             _ => {
                 unreachable!();
             }
@@ -271,7 +283,7 @@ impl<T> RdxTree<T> where T: Clone + Rdx {
         match self.root {
             Node::Inner(ref inner) => {
                 stack.push(((inner.clone(), 1, false)));
-            },
+            }
             _ => unreachable!(),
         }
         RdxTreeIter {
@@ -282,20 +294,19 @@ impl<T> RdxTree<T> where T: Clone + Rdx {
 
     pub fn nnodes(&self) -> (usize, usize, usize, usize) {
         match self.root {
-            Node::Inner(ref inner) => {
-                inner.borrow().nnodes()
-            },
-            _ => {
-                unreachable!()
-            }
+            Node::Inner(ref inner) => inner.borrow().nnodes(),
+            _ => unreachable!(),
         }
     }
 }
 
 
-pub struct RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
+pub struct RdxTreeIter<'a, T>
+    where T: Clone + Rdx + 'a
+{
     // iterator stack:
-    //   - reference to inner node (do not work with iterators directly since we need a checked but dynamic borrow)
+    //   - reference to inner node
+    //     (do not work with iterators directly since we need a checked but dynamic borrow)
     //   - current iterator state + 1 (so `0` encodes the "the one BEFORE beginning)
     //   - reverse the iterator order for this subpart if `True`
     stack: Vec<(Rc<RefCell<NodeInner<T>>>, usize, bool)>,
@@ -305,7 +316,9 @@ pub struct RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
 }
 
 
-impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
+impl<'a, T> Iterator for RdxTreeIter<'a, T>
+    where T: Clone + Rdx + 'a
+{
     type Item = T;  // XXX: do not copy!
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -333,17 +346,17 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
                     match borrowed.children[*i - 1] {
                         Node::Free => {
                             // it's a free node, we can ignore that and continue with the iteration
-                        },
+                        }
                         Node::Child(ref x) => {
                             // we have found some usable data :)
                             result = Some(x.clone());
-                        },
+                        }
                         Node::Inner(ref inner) => {
                             // inner node => push a new state to the stack
                             let round = <T as Rdx>::cfg_nrounds() - stacksize;
                             let rev = reverse ^ <T as Rdx>::reverse(round, *i - 1);
                             push = Some((inner.clone(), rev));
-                        },
+                        }
                         Node::Pruned(ref pruned) => {
                             // pruned tree part => let's check what the child is
                             let borrowed2 = pruned.borrow();
@@ -351,7 +364,7 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
                                 NodeLimited::Child(ref x) => {
                                     // usable data :)
                                     result = Some(x.clone());
-                                },
+                                }
                                 NodeLimited::Inner(ref inner) => {
                                     // simulate traversal of pruned tree part to recover `reverse`
                                     let mut round = <T as Rdx>::cfg_nrounds() - stacksize;
@@ -362,9 +375,9 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
                                     }
 
                                     push = Some((inner.clone(), rev));
-                                },
+                                }
                             }
-                        },
+                        }
                     }
 
                     if reverse {
@@ -384,11 +397,7 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
             } else if let Some((next, rev)) = push {
                 // the iteration of the next stack part starts either at the beginning or end,
                 // depending on the fact that it is a reversed iteration or not
-                let idx_start = if rev {
-                    next.borrow().children.len()
-                } else {
-                    1
-                };
+                let idx_start = if rev { next.borrow().children.len() } else { 1 };
                 self.stack.push((next, idx_start, rev));
             }
         }
@@ -399,7 +408,9 @@ impl<'a, T> Iterator for RdxTreeIter<'a, T> where T: Clone + Rdx + 'a {
 }
 
 
-fn print_node<T>(node: &Node<T>, depth: usize) where T: Clone + fmt::Display + Rdx {
+fn print_node<T>(node: &Node<T>, depth: usize)
+    where T: Clone + fmt::Display + Rdx
+{
     let prefix: String = (0..depth).map(|_| ' ').collect();
     match *node {
         Node::Inner(ref inner) => {
@@ -407,24 +418,26 @@ fn print_node<T>(node: &Node<T>, depth: usize) where T: Clone + fmt::Display + R
                 println!("{}{}:", prefix, i);
                 print_node(c, depth + 1);
             }
-        },
+        }
         Node::Pruned(ref pruned) => {
             let borrowed = pruned.borrow();
             println!("{}P: [{:?}]", prefix, borrowed.buckets);
             let c = (&(borrowed.child)).into();
             print_node(&c, depth + borrowed.buckets.len());
-        },
+        }
         Node::Child(ref x) => {
             println!("{}=> {}", prefix, x);
-        },
+        }
         Node::Free => {
             println!("{}X", prefix);
-        },
+        }
     }
 }
 
 
-fn print_tree<T>(tree: &RdxTree<T>) where T: Clone + fmt::Display + Rdx {
+fn print_tree<T>(tree: &RdxTree<T>)
+    where T: Clone + fmt::Display + Rdx
+{
     print_node(&tree.root, 0);
 }
 
