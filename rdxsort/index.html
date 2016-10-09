@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `rdxsort` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, rdxsort">
+
+    <title>rdxsort - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'rdxsort', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>rdxsort</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/rdxsort/src/lib.rs.html#1-263' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'>
+<h1 id='rdxsort' class='section-header'><a href='#rdxsort'>RdxSort</a></h1>
+<p>This crate implements <a href="https://en.wikipedia.org/wiki/Radix_sort">Radix Sort</a> for slices of
+different data types, either directly or by exploiting the implementation of other data types.</p>
+
+<p>The main reason for implementing yet another sorting algorithm is that most sorting algorithms
+are comparative methods. To sort data, they rely on a function that compares data elements. It
+can be proven that this leads to a runtime complexity of <code>O(n*log(n))</code> in average and <code>O(n^2)</code>
+in the worst case. In contrast to that, Radix Sort exploits that fact that many data types have
+a limited range of possible values and within that range a limited resolution (that also holds
+for floating point numbers). For a detailed explanation see the
+<a href="https://en.wikipedia.org/wiki/Radix_sort">Wikipedia article</a>. The result of this special
+treatment is a lowered and constant complexity of <code>O(n*k)</code> where <code>k</code> is the number of fixed
+rounds required to sort a specific data type.</p>
+
+<h2 id='supported-data-types' class='section-header'><a href='#supported-data-types'>Supported Data Types</a></h2>
+<p>Currently, the following data types are supported:</p>
+
+<ul>
+<li><strong>bool:</strong> simple split into 2 chunks</li>
+<li><strong>char:</strong> behaves like <code>u32</code></li>
+<li><strong>unsigned integers:</strong> native implementation, depending on the width</li>
+<li><strong>signed integers:</strong> splitting into positive and negative parts and using the unsigned
+implementation</li>
+<li><strong>floats:</strong> splitting of data into positive and negative numbers and treating the two
+ranges as unsigned integer values. <code>NaN</code>s are not supported!</li>
+<li><strong>arrays, tuples:</strong> use the implementation of the inner data types</li>
+<li><em>custom data types...: fill in the provided template trait</em></li>
+</ul>
+
+<h2 id='example' class='section-header'><a href='#example'>Example</a></h2>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>rdxsort</span>::<span class='op'>*</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>, <span class='number'>10</span>, <span class='number'>0</span>, <span class='number'>1</span>];
+    <span class='ident'>data</span>.<span class='ident'>rdxsort</span>();
+    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>data</span> <span class='op'>==</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>10</span>]);
+}</pre>
+
+<h2 id='performance' class='section-header'><a href='#performance'>Performance</a></h2>
+<p>Of course the lower runtime complexity of Radix Sort shows its power when sorting certain data
+types. The advantage depends on the size and complexity of the type. While short unsigned
+integers benefit the most, long types do not show that huge improvements. The following listing
+shows the runtime in ns required for sorting data sets of different sizes. The data sets are
+sampled using an uniform distribution. The best algorithm out of the following is marked:</p>
+
+<ul>
+<li><a href="https://crates.io/crates/quicksort">quicksort</a></li>
+<li>rdxsort (this crate)</li>
+<li><a href="https://doc.rust-lang.org/std/vec/struct.Vec.html#method.sort_by">standard library</a></li>
+</ul>
+
+<p>Keep in mind that the results may vary depending on the hardware, compiler version, operating
+system version and configuration and the weather.</p>
+
+<h3 id='small-1000-elements' class='section-header'><a href='#small-1000-elements'>Small (1&#39;000 elements)</a></h3>
+<p>For small data sets Radix Sort can be an advantage for data types with up to 32 bits size. For
+64 bits, standard library sorting should be preferred.</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: right">type</th>
+<th style="text-align: right">quicksort</th>
+<th style="text-align: right">rdxsort</th>
+<th style="text-align: right">std</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: right"><code>bool</code></td>
+<td style="text-align: right"><code>4,070</code></td>
+<td style="text-align: right"><strong><code>2,246</code></strong></td>
+<td style="text-align: right"><code>26,068</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>char</code></td>
+<td style="text-align: right"><code>31,121</code></td>
+<td style="text-align: right"><strong><code>20,204</code></strong></td>
+<td style="text-align: right"><code>34,051</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>f32</code></td>
+<td style="text-align: right"><code>79,714</code></td>
+<td style="text-align: right"><strong><code>25,825</code></strong></td>
+<td style="text-align: right"><code>77,774</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>f64</code></td>
+<td style="text-align: right"><code>80,954</code></td>
+<td style="text-align: right"><strong><code>52,262</code></strong></td>
+<td style="text-align: right"><code>79,431</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i16</code></td>
+<td style="text-align: right"><code>32,896</code></td>
+<td style="text-align: right"><strong><code>12,496</code></strong></td>
+<td style="text-align: right"><code>31,167</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i32</code></td>
+<td style="text-align: right"><code>32,854</code></td>
+<td style="text-align: right"><strong><code>22,009</code></strong></td>
+<td style="text-align: right"><code>30,713</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i64</code></td>
+<td style="text-align: right"><code>33,064</code></td>
+<td style="text-align: right"><code>53,366</code></td>
+<td style="text-align: right"><strong><code>31,669</code></strong></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i8</code></td>
+<td style="text-align: right"><code>24,819</code></td>
+<td style="text-align: right"><strong><code>8,190</code></strong></td>
+<td style="text-align: right"><code>46,281</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u16</code></td>
+<td style="text-align: right"><code>35,252</code></td>
+<td style="text-align: right"><strong><code>9,937</code></strong></td>
+<td style="text-align: right"><code>33,946</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u32</code></td>
+<td style="text-align: right"><code>33,002</code></td>
+<td style="text-align: right"><strong><code>19,202</code></strong></td>
+<td style="text-align: right"><code>33,627</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u64</code></td>
+<td style="text-align: right"><strong><code>32,986</code></strong></td>
+<td style="text-align: right"><code>47,739</code></td>
+<td style="text-align: right"><code>33,204</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u8</code></td>
+<td style="text-align: right"><code>25,425</code></td>
+<td style="text-align: right"><strong><code>5,170</code></strong></td>
+<td style="text-align: right"><code>47,369</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id='medium-10000-elements' class='section-header'><a href='#medium-10000-elements'>Medium (10&#39;000 elements)</a></h3>
+<p>For medium data sets Radix Sort could be blindly used for all data types since the disadvantage
+for types with 64 bits is quite small.</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: right">type</th>
+<th style="text-align: right">quicksort</th>
+<th style="text-align: right">rdxsort</th>
+<th style="text-align: right">std</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: right"><code>bool</code></td>
+<td style="text-align: right"><code>52,211</code></td>
+<td style="text-align: right"><strong><code>22,083</code></strong></td>
+<td style="text-align: right"><code>400,111</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>char</code></td>
+<td style="text-align: right"><code>655,553</code></td>
+<td style="text-align: right"><strong><code>192,328</code></strong></td>
+<td style="text-align: right"><code>508,557</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>f32</code></td>
+<td style="text-align: right"><code>1,086,882</code></td>
+<td style="text-align: right"><strong><code>230,670</code></strong></td>
+<td style="text-align: right"><code>1,117,565</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>f64</code></td>
+<td style="text-align: right"><code>1,095,529</code></td>
+<td style="text-align: right"><strong><code>417,104</code></strong></td>
+<td style="text-align: right"><code>1,152,340</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i16</code></td>
+<td style="text-align: right"><code>665,131</code></td>
+<td style="text-align: right"><strong><code>108,128</code></strong></td>
+<td style="text-align: right"><code>455,047</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i32</code></td>
+<td style="text-align: right"><code>650,501</code></td>
+<td style="text-align: right"><strong><code>202,533</code></strong></td>
+<td style="text-align: right"><code>460,097</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i64</code></td>
+<td style="text-align: right"><code>669,643</code></td>
+<td style="text-align: right"><strong><code>378,480</code></strong></td>
+<td style="text-align: right"><code>470,572</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i8</code></td>
+<td style="text-align: right"><code>383,545</code></td>
+<td style="text-align: right"><strong><code>65,521</code></strong></td>
+<td style="text-align: right"><code>617,405</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u16</code></td>
+<td style="text-align: right"><code>675,060</code></td>
+<td style="text-align: right"><strong><code>78,424</code></strong></td>
+<td style="text-align: right"><code>508,264</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u32</code></td>
+<td style="text-align: right"><code>670,348</code></td>
+<td style="text-align: right"><strong><code>177,068</code></strong></td>
+<td style="text-align: right"><code>511,134</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u64</code></td>
+<td style="text-align: right"><code>664,549</code></td>
+<td style="text-align: right"><strong><code>342,935</code></strong></td>
+<td style="text-align: right"><code>517,176</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u8</code></td>
+<td style="text-align: right"><code>386,572</code></td>
+<td style="text-align: right"><strong><code>37,012</code></strong></td>
+<td style="text-align: right"><code>655,377</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id='large-100000-elements' class='section-header'><a href='#large-100000-elements'>Large (100&#39;000 elements)</a></h3>
+<p>For large data sets, Radix Sort is great for all data types.</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: right">type</th>
+<th style="text-align: right">quicksort</th>
+<th style="text-align: right">rdxsort</th>
+<th style="text-align: right">std</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: right"><code>bool</code></td>
+<td style="text-align: right"><code>815,653</code></td>
+<td style="text-align: right"><strong><code>216,809</code></strong></td>
+<td style="text-align: right"><code>4,900,426</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>char</code></td>
+<td style="text-align: right"><code>8,131,402</code></td>
+<td style="text-align: right"><strong><code>2,538,064</code></strong></td>
+<td style="text-align: right"><code>6,333,865</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>f32</code></td>
+<td style="text-align: right"><code>13,554,291</code></td>
+<td style="text-align: right"><strong><code>3,264,657</code></strong></td>
+<td style="text-align: right"><code>14,340,082</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>f64</code></td>
+<td style="text-align: right"><code>13,746,190</code></td>
+<td style="text-align: right"><strong><code>7,122,334</code></strong></td>
+<td style="text-align: right"><code>15,563,206</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i16</code></td>
+<td style="text-align: right"><code>8,235,642</code></td>
+<td style="text-align: right"><strong><code>1,248,289</code></strong></td>
+<td style="text-align: right"><code>5,575,196</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i32</code></td>
+<td style="text-align: right"><code>8,184,902</code></td>
+<td style="text-align: right"><strong><code>2,494,882</code></strong></td>
+<td style="text-align: right"><code>5,852,913</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i64</code></td>
+<td style="text-align: right"><code>8,222,482</code></td>
+<td style="text-align: right"><strong><code>5,446,507</code></strong></td>
+<td style="text-align: right"><code>6,561,292</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>i8</code></td>
+<td style="text-align: right"><code>3,664,532</code></td>
+<td style="text-align: right"><strong><code>703,288</code></strong></td>
+<td style="text-align: right"><code>7,118,816</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u16</code></td>
+<td style="text-align: right"><code>8,272,903</code></td>
+<td style="text-align: right"><strong><code>866,833</code></strong></td>
+<td style="text-align: right"><code>6,291,101</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u32</code></td>
+<td style="text-align: right"><code>8,193,408</code></td>
+<td style="text-align: right"><strong><code>2,051,413</code></strong></td>
+<td style="text-align: right"><code>6,395,163</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u64</code></td>
+<td style="text-align: right"><code>8,179,078</code></td>
+<td style="text-align: right"><strong><code>4,393,579</code></strong></td>
+<td style="text-align: right"><code>7,216,868</code></td>
+</tr>
+<tr>
+<td style="text-align: right"><code>u8</code></td>
+<td style="text-align: right"><code>3,681,361</code></td>
+<td style="text-align: right"><strong><code>367,240</code></strong></td>
+<td style="text-align: right"><code>7,816,775</code></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id='implementing-new-types' class='section-header'><a href='#implementing-new-types'>Implementing New Types</a></h2>
+<p>This crate enables you to add support for new types by implementing <code>Rdx</code>. It
+describes how data is sorted into buckets and how many rounds of sorting are scheduled.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>rdxsort</span>::<span class='op'>*</span>;
+
+<span class='comment'>// `Clone` is required for `RdxSort`</span>
+<span class='comment'>// `PartialEq` is only required for the equality assert, not for the actual sorting</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>Foo</span> {
+    <span class='ident'>a</span>: <span class='ident'>u8</span>,
+    <span class='ident'>b</span>: <span class='ident'>u8</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>Rdx</span> <span class='kw'>for</span> <span class='ident'>Foo</span> {
+    <span class='comment'>// using `#[inline]` is generally recommended since it helps</span>
+    <span class='comment'>// the compiler to optimize the sorting algorithm</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>cfg_nbuckets</span>() <span class='op'>-&gt;</span> <span class='ident'>usize</span> {
+        <span class='comment'>// usually too high, but works as a simple demonstration</span>
+        <span class='comment'>// `256 = 2^8`</span>
+        <span class='number'>256</span>
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>cfg_nrounds</span>() <span class='op'>-&gt;</span> <span class='ident'>usize</span> {
+        <span class='comment'>// one per sub-type</span>
+        <span class='number'>2</span>
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>get_bucket</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>round</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span> {
+        <span class='comment'>// return the least significant digit first</span>
+        <span class='kw'>if</span> <span class='ident'>round</span> <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='self'>self</span>.<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>usize</span>
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>a</span> <span class='kw'>as</span> <span class='ident'>usize</span>
+        }
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>reverse</span>(<span class='ident'>_round</span>: <span class='ident'>usize</span>, <span class='ident'>_bucket</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='comment'>// not required in our case</span>
+        <span class='bool-val'>false</span>
+    }
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>5</span>, <span class='ident'>b</span>: <span class='number'>2</span>},
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>0</span>, <span class='ident'>b</span>: <span class='number'>1</span>},
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>5</span>, <span class='ident'>b</span>: <span class='number'>1</span>},
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>0</span>, <span class='ident'>b</span>: <span class='number'>2</span>},
+    ];
+    <span class='ident'>data</span>.<span class='ident'>rdxsort</span>();
+
+    <span class='kw'>let</span> <span class='ident'>reference</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>0</span>, <span class='ident'>b</span>: <span class='number'>1</span>},
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>0</span>, <span class='ident'>b</span>: <span class='number'>2</span>},
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>5</span>, <span class='ident'>b</span>: <span class='number'>1</span>},
+        <span class='ident'>Foo</span>{<span class='ident'>a</span>: <span class='number'>5</span>, <span class='ident'>b</span>: <span class='number'>2</span>},
+    ];
+    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>data</span> <span class='op'>==</span> <span class='ident'>reference</span>);
+}</pre>
+</div><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.rdx_alias!.html'
+                                  title='rdxsort::rdx_alias!'>rdx_alias!</a></td>
+                           <td class='docblock short'>
+                                <p>Implements <code>t1</code> as alias of <code>t2</code>, e.g. <code>usize = u64</code> on platforms that have 64 bit pointers.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RdxTree.html'
+                                  title='rdxsort::RdxTree'>RdxTree</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RdxTreeIter.html'
+                                  title='rdxsort::RdxTreeIter'>RdxTreeIter</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Rdx.html'
+                                  title='rdxsort::Rdx'>Rdx</a></td>
+                           <td class='docblock short'>
+                                <p>Generic Radix Sort implementation</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.RdxSort.html'
+                                  title='rdxsort::RdxSort'>RdxSort</a></td>
+                           <td class='docblock short'>
+                                <p>Radix Sort implementation for some type</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "rdxsort";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
