@@ -130,7 +130,7 @@
 //!
 //! // `Clone` is required for `RdxSort`
 //! // `PartialEq` is only required for the equality assert, not for the actual sorting
-//! #[derive(Clone, PartialEq)]
+//! #[derive(Copy, Clone, PartialEq)]
 //! struct Foo {
 //!     a: u8,
 //!     b: u8,
